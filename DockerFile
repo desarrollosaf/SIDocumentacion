@@ -1,0 +1,36 @@
+# ============================================
+# Etapa 1: compilar Angular
+# ============================================
+FROM node:24-alpine AS build
+
+WORKDIR /app
+
+ARG BASE_HREF=/sidocumentacion/
+
+COPY package.json package-lock.json ./
+
+RUN npm ci
+
+COPY . .
+
+RUN npm run build -- \
+    --configuration production \
+    --base-href "${BASE_HREF}" \
+    --deploy-url "${BASE_HREF}"
+
+
+# ============================================
+# Etapa 2: publicar Angular con Nginx
+# ============================================
+FROM nginx:1.27-alpine
+
+RUN rm -rf /usr/share/nginx/html/*
+
+COPY nginx.conf /etc/nginx/conf.d/default.conf
+
+# Angular 22 normalmente genera dist/<nombre-proyecto>/browser
+COPY --from=build /app/dist/sidocumentacion/browser /usr/share/nginx/html
+
+EXPOSE 80
+
+CMD ["nginx", "-g", "daemon off;"]

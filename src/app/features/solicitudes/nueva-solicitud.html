@@ -1,0 +1,254 @@
+<sid-page-header
+  titulo="Nueva solicitud"
+  descripcion="Registra un documento recibido y túrnalo para su atención."
+  [migas]="[{ etiqueta: 'Documentación' }, { etiqueta: 'Nueva solicitud' }]"
+/>
+
+<form [formGroup]="formulario" novalidate>
+  <div class="row g-3">
+    <!-- Datos de la solicitud -->
+    <div class="col-12 col-lg-7">
+      <section class="sid-card p-4">
+        <h2 class="h6 mb-3">Datos del documento</h2>
+
+        <div class="mb-3">
+          <label for="asunto" class="form-label">Asunto <span class="text-danger">*</span></label>
+          <input
+            id="asunto"
+            type="text"
+            class="form-control"
+            formControlName="titulo_doc"
+            placeholder="Describe el asunto de la solicitud"
+            [class.is-invalid]="
+              formulario.controls.titulo_doc.touched && formulario.controls.titulo_doc.invalid
+            "
+          />
+          @if (formulario.controls.titulo_doc.touched && formulario.controls.titulo_doc.invalid) {
+            <div class="invalid-feedback d-block">El asunto es obligatorio.</div>
+          }
+        </div>
+
+        <div class="row g-3">
+          <div class="col-12 col-md-4">
+            <label for="fRecepcion" class="form-label">
+              Fecha de recepción <span class="text-danger">*</span>
+            </label>
+            <input
+              id="fRecepcion"
+              type="date"
+              class="form-control"
+              formControlName="fecha_recepcion"
+            />
+          </div>
+
+          <div class="col-12 col-md-4">
+            <label for="fDocumento" class="form-label">
+              Fecha del documento <span class="text-danger">*</span>
+            </label>
+            <input
+              id="fDocumento"
+              type="date"
+              class="form-control"
+              formControlName="fecha_documento"
+            />
+          </div>
+
+          <div class="col-12 col-md-4">
+            <label for="fLimite" class="form-label">
+              Fecha límite <span class="text-danger">*</span>
+            </label>
+            <input
+              id="fLimite"
+              type="date"
+              class="form-control"
+              formControlName="fecha_limite_atencion"
+              [class.is-invalid]="
+                formulario.controls.fecha_limite_atencion.touched &&
+                formulario.controls.fecha_limite_atencion.invalid
+              "
+            />
+          </div>
+        </div>
+
+        <div class="row g-3 mt-0">
+          <div class="col-12 col-md-4">
+            <label for="tipoAtencion" class="form-label">
+              Tipo de atención <span class="text-danger">*</span>
+            </label>
+            <select
+              id="tipoAtencion"
+              class="form-select"
+              formControlName="tipo_atencion"
+              [class.is-invalid]="
+                formulario.controls.tipo_atencion.touched &&
+                formulario.controls.tipo_atencion.invalid
+              "
+            >
+              <option [ngValue]="null">Selecciona…</option>
+              @for (tipo of tiposAtencion(); track tipo.id) {
+                <option [ngValue]="tipo.id">{{ tipo.nombre }}</option>
+              }
+            </select>
+          </div>
+
+          <div class="col-12 col-md-5">
+            <label for="tipoDocumento" class="form-label">Tipo de documento</label>
+            <select id="tipoDocumento" class="form-select" formControlName="tipo_doc">
+              <option [ngValue]="null">Selecciona…</option>
+              @for (tipo of tiposDocumento(); track tipo.id) {
+                <option [ngValue]="tipo.id">{{ tipo.nombre }}</option>
+              }
+            </select>
+          </div>
+
+          <div class="col-12 col-md-3">
+            <label for="fojasSolicitud" class="form-label">Fojas</label>
+            <input
+              id="fojasSolicitud"
+              type="number"
+              min="1"
+              class="form-control"
+              formControlName="fojas"
+            />
+          </div>
+        </div>
+
+        <hr class="my-4" />
+
+        <h2 class="h6 mb-3">Clasificación archivística</h2>
+
+        <div class="row g-3">
+          <div class="col-12 col-md-6">
+            <label for="serieSolicitud" class="form-label">Serie</label>
+            <select
+              id="serieSolicitud"
+              class="form-select"
+              (change)="alCambiarSerie(selectSerie.value)"
+              #selectSerie
+            >
+              <option value="">Selecciona…</option>
+              @for (serie of clasificacion(); track serie.id) {
+                <option [value]="serie.id">{{ serie.nombre }}</option>
+              }
+            </select>
+          </div>
+
+          <div class="col-12 col-md-6">
+            <label for="subserieSolicitud" class="form-label">Subserie</label>
+            <select
+              id="subserieSolicitud"
+              class="form-select"
+              formControlName="subserie_id"
+              [disabled]="!subseries().length"
+            >
+              <option [ngValue]="null">
+                {{ subseries().length ? 'Selecciona…' : 'Elige primero una serie' }}
+              </option>
+              @for (sub of subseries(); track sub.id) {
+                <option [ngValue]="sub.id">{{ sub.nombre }}</option>
+              }
+            </select>
+          </div>
+        </div>
+      </section>
+    </div>
+
+    <!-- Turnos -->
+    <div class="col-12 col-lg-5">
+      <section class="sid-card p-4">
+        <h2 class="h6 mb-1">Turnar a</h2>
+        <p class="text-muted-2 small">
+          Busca en el padrón institucional e indica la instrucción de cada turno.
+        </p>
+
+        <div class="input-group mb-2">
+          <span class="input-group-text">
+            <i class="bi bi-search" aria-hidden="true"></i>
+          </span>
+          <input
+            type="search"
+            class="form-control"
+            placeholder="Nombre del servidor público"
+            aria-label="Buscar persona a quien turnar"
+            (input)="buscar(campoTurno.value)"
+            #campoTurno
+          />
+        </div>
+
+        @if (resultados().length) {
+          <ul class="list-group mb-3">
+            @for (servidor of resultados(); track servidor.rfc) {
+              <li class="list-group-item list-group-item-action py-2">
+                <button
+                  type="button"
+                  class="btn btn-link p-0 text-start text-decoration-none w-100"
+                  (click)="agregar(servidor)"
+                >
+                  <span class="d-block fw-semibold small text-body">{{ servidor.nombre }}</span>
+                  <span class="d-block text-muted-2" style="font-size: 0.73rem">
+                    {{ servidor.departamento ?? servidor.direccion ?? servidor.dependencia }}
+                  </span>
+                </button>
+              </li>
+            }
+          </ul>
+        }
+
+        @if (!turnos().length) {
+          <div class="alert alert-light border small mb-0">
+            Aún no has turnado la solicitud a nadie.
+          </div>
+        } @else {
+          <ul class="list-unstyled mb-0">
+            @for (turno of turnos(); track turno.rfc) {
+              <li class="border rounded p-2 mb-2">
+                <div class="d-flex justify-content-between align-items-start gap-2">
+                  <div class="min-w-0">
+                    <p class="mb-0 fw-semibold small text-truncate">{{ turno.nombre }}</p>
+                    <p class="mb-0 text-muted-2" style="font-size: 0.72rem">{{ turno.rfc }}</p>
+                  </div>
+                  <button
+                    type="button"
+                    class="btn btn-sm btn-outline-danger btn-icon"
+                    [attr.aria-label]="'Quitar turno de ' + turno.nombre"
+                    (click)="quitar(turno.rfc)"
+                  >
+                    <i class="bi bi-x-lg" aria-hidden="true"></i>
+                  </button>
+                </div>
+
+                <textarea
+                  class="form-control form-control-sm mt-2"
+                  rows="2"
+                  placeholder="Instrucción (opcional)"
+                  [attr.aria-label]="'Instrucción para ' + turno.nombre"
+                  [ngModel]="turno.instruccion"
+                  [ngModelOptions]="{ standalone: true }"
+                  (ngModelChange)="cambiarInstruccion(turno.rfc, $event)"
+                ></textarea>
+              </li>
+            }
+          </ul>
+        }
+      </section>
+    </div>
+  </div>
+
+  <div class="d-flex flex-wrap justify-content-end gap-2 mt-4">
+    <a routerLink="/solicitudes/salida" class="btn btn-outline-secondary">Cancelar</a>
+    <button
+      type="button"
+      class="btn btn-outline-primary"
+      [disabled]="enviando()"
+      (click)="enviar(true)"
+    >
+      Guardar como preregistro
+    </button>
+    <button type="button" class="btn btn-primary" [disabled]="enviando()" (click)="enviar()">
+      @if (enviando()) {
+        <span class="spinner-border spinner-border-sm me-2" aria-hidden="true"></span>
+      }
+      Registrar y turnar
+    </button>
+  </div>
+</form>

@@ -1,0 +1,118 @@
+@if (cargando()) {
+  <sid-cargando mensaje="Cargando oficio…" />
+} @else if (!oficio()) {
+  <div class="alert alert-warning">No fue posible cargar el oficio solicitado.</div>
+} @else {
+  <sid-page-header
+    [titulo]="oficio()!.titulo_doc ?? 'Oficio'"
+    [descripcion]="'Folio ' + (oficio()!.folio ?? '—')"
+    [migas]="[{ etiqueta: 'Oficios', ruta: '/oficios/entrada' }, { etiqueta: 'Detalle' }]"
+  >
+    <button type="button" class="btn btn-outline-secondary" (click)="regresar()">
+      <i class="bi bi-arrow-left me-1" aria-hidden="true"></i>Regresar
+    </button>
+
+    @if (miAtencion() && !miAtencion()!.status_atencion) {
+      <button type="button" class="btn btn-success" (click)="atender()">
+        <i class="bi bi-check2-circle me-1" aria-hidden="true"></i>Marcar como atendido
+      </button>
+    }
+  </sid-page-header>
+
+  <div class="row g-3">
+    <!-- Datos del documento -->
+    <div class="col-12 col-lg-7">
+      <section class="sid-card p-4 h-100">
+        <h2 class="h6 mb-3">Datos del documento</h2>
+
+        <dl class="row mb-0 small">
+          <dt class="col-sm-4 text-muted-2 fw-normal">Folio</dt>
+          <dd class="col-sm-8 tabular fw-semibold">{{ oficio()!.folio ?? '—' }}</dd>
+
+          <dt class="col-sm-4 text-muted-2 fw-normal">Asunto</dt>
+          <dd class="col-sm-8">{{ oficio()!.titulo_doc ?? '—' }}</dd>
+
+          <dt class="col-sm-4 text-muted-2 fw-normal">Remitente</dt>
+          <dd class="col-sm-8">{{ oficio()!.remitente }}</dd>
+
+          <dt class="col-sm-4 text-muted-2 fw-normal">Fojas</dt>
+          <dd class="col-sm-8 tabular">{{ oficio()!.fojas ?? '—' }}</dd>
+
+          <dt class="col-sm-4 text-muted-2 fw-normal">Fecha de registro</dt>
+          <dd class="col-sm-8 tabular">
+            {{ oficio()!.created_at | date: 'dd/MM/yyyy HH:mm' }}
+          </dd>
+
+          <dt class="col-sm-4 text-muted-2 fw-normal">Firma electrónica</dt>
+          <dd class="col-sm-8 mb-0">
+            @if (oficio()!.firmado) {
+              <span class="badge text-bg-success">
+                <i class="bi bi-patch-check me-1" aria-hidden="true"></i>Firmado
+              </span>
+            } @else {
+              <span class="badge text-bg-secondary">Sin firmar</span>
+            }
+          </dd>
+        </dl>
+
+        @if (oficio()!.uuid_doc) {
+          <div class="alert alert-light border mt-3 mb-0 small">
+            <span class="text-muted-2 d-block">Identificador del documento</span>
+            <code class="text-break">{{ oficio()!.uuid_doc }}</code>
+          </div>
+        }
+      </section>
+    </div>
+
+    <!-- Destinatarios y su avance -->
+    <div class="col-12 col-lg-5">
+      <section class="sid-card h-100">
+        <div class="px-3 py-3 border-bottom">
+          <h2 class="h6 mb-0">Destinatarios</h2>
+        </div>
+
+        <ul class="list-unstyled mb-0">
+          @for (destinatario of oficio()!.destinatarios; track destinatario.id) {
+            <li class="px-3 py-3 border-bottom">
+              <div class="d-flex justify-content-between align-items-start gap-2">
+                <div class="min-w-0">
+                  <p class="mb-0 fw-semibold small text-truncate">{{ destinatario.nombre }}</p>
+                  <p class="mb-0 text-muted-2" style="font-size: 0.75rem">
+                    {{ etiquetaPapel(destinatario.tipo_atencion) }}
+                    @if (destinatario.turnado_por) {
+                      · turnado por {{ destinatario.turnado_por }}
+                    }
+                  </p>
+                </div>
+
+                @if (destinatario.status_atencion) {
+                  <span class="badge badge-estado text-success-emphasis bg-success-subtle">
+                    Atendido
+                  </span>
+                } @else if (destinatario.visto) {
+                  <span class="badge badge-estado text-warning-emphasis bg-warning-subtle">
+                    Visto
+                  </span>
+                } @else {
+                  <span class="badge badge-estado text-secondary-emphasis bg-secondary-subtle">
+                    Sin abrir
+                  </span>
+                }
+              </div>
+
+              @if (destinatario.fecha_atencion) {
+                <p class="mb-0 mt-1 text-muted-2" style="font-size: 0.72rem">
+                  Atendido el {{ destinatario.fecha_atencion | date: 'dd/MM/yyyy HH:mm' }}
+                </p>
+              } @else if (destinatario.fecha_visto) {
+                <p class="mb-0 mt-1 text-muted-2" style="font-size: 0.72rem">
+                  Visto el {{ destinatario.fecha_visto | date: 'dd/MM/yyyy HH:mm' }}
+                </p>
+              }
+            </li>
+          }
+        </ul>
+      </section>
+    </div>
+  </div>
+}

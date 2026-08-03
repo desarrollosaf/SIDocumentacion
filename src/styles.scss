@@ -1,0 +1,219 @@
+// ===========================================================================
+// Sistema de diseño institucional — SIDocumentación
+// Bootstrap 5 personalizado con la paleta y la tipografía del gobierno.
+//
+// La fuente de iconos (bootstrap-icons) se carga desde angular.json para no
+// pasar una hoja CSS por el compilador de Sass.
+// ===========================================================================
+
+// --- 1. Paleta institucional -----------------------------------------------
+// Guinda institucional como color primario, con acentos dorados para acciones
+// destacadas y una escala de grises fría para superficies y texto.
+// Se declaran antes del @use porque configuran el módulo de Bootstrap.
+$guinda-900: #4a0d21;
+$guinda-800: #5e1128;
+$guinda-700: #73162f;
+$guinda-600: #8a1c38;
+$guinda-500: #a12242;
+$guinda-300: #d98ba4;
+$guinda-100: #f6e5eb;
+
+$dorado-600: #9c7c1f;
+$dorado-500: #bf9a2e;
+$dorado-100: #fbf3dc;
+
+$gris-borde: #dfe3ea;
+$gris-superficie: #f5f6f8;
+
+// --- 2. Configuración de Bootstrap ----------------------------------------
+@use 'bootstrap/scss/bootstrap' with (
+  // Colores del tema
+  $primary: $guinda-700,
+  $secondary: #5b6472,
+  $success: #1f7a52,
+  $info: #1c6b8c,
+  $warning: $dorado-500,
+  $danger: #b32d2e,
+  $light: $gris-superficie,
+  $dark: #1f242b,
+  $body-color: #2b3138,
+  $body-bg: #f2f4f7,
+
+  // Tipografía: pila del sistema, sin dependencias remotas.
+  $font-family-sans-serif: (
+    'Segoe UI',
+    -apple-system,
+    BlinkMacSystemFont,
+    Roboto,
+    'Helvetica Neue',
+    Arial,
+    sans-serif
+  ),
+  $font-size-base: 0.9375rem,
+  $line-height-base: 1.55,
+  $headings-font-weight: 600,
+  $headings-color: $guinda-900,
+
+  // Forma
+  $border-radius: 0.5rem,
+  $border-radius-sm: 0.35rem,
+  $border-radius-lg: 0.75rem,
+  $border-color: $gris-borde,
+
+  // Componentes
+  $card-border-color: $gris-borde,
+  $card-cap-bg: #fff,
+  $card-spacer-y: 1.25rem,
+  $card-spacer-x: 1.5rem,
+  $table-cell-padding-y: 0.75rem,
+  $table-cell-padding-x: 1rem,
+  $table-th-font-weight: 600,
+  $table-hover-bg: $guinda-100,
+  $input-btn-focus-color-opacity: 0.2,
+  $input-border-color: #cfd6e0,
+  $input-focus-border-color: $guinda-300,
+  $btn-font-weight: 500,
+  $dropdown-border-color: $gris-borde,
+  $modal-content-border-color: $gris-borde
+);
+
+// --- 4. Tokens de aplicación ----------------------------------------------
+// El resto de la interfaz consume estas variables, de modo que un cambio de
+// identidad institucional se resuelve editando solo este bloque.
+:root {
+  --sid-sidebar-width: 16.5rem;
+  --sid-sidebar-width-collapsed: 4.5rem;
+  --sid-topbar-height: 4rem;
+
+  // Menú claro: fondo blanco, texto oscuro y guinda solo como acento del
+  // elemento activo. Da una lectura más ligera que el panel oscuro.
+  --sid-sidebar-bg: #fff;
+  --sid-sidebar-bg-hover: #{$guinda-100};
+  --sid-sidebar-fg: #4a525e;
+  --sid-sidebar-fg-active: #{$guinda-700};
+  --sid-sidebar-accent: #{$guinda-700};
+  --sid-sidebar-border: #{$gris-borde};
+
+  --sid-surface: #fff;
+  --sid-border: #{$gris-borde};
+  --sid-muted: #6b7481;
+  --sid-primary: #{$guinda-700};
+  --sid-primary-soft: #{$guinda-100};
+
+  // Acentos cálidos para tarjetas e indicadores.
+  --sid-calido: #{$dorado-500};
+  --sid-calido-suave: #{$dorado-100};
+  --sid-naranja: #e07a2f;
+  --sid-naranja-suave: #fdf0e4;
+
+  // Degradado institucional de los encabezados destacados.
+  --sid-degradado: linear-gradient(120deg, #{$guinda-800} 0%, #{$guinda-600} 60%, #{$guinda-500} 100%);
+
+  --sid-shadow-sm: 0 1px 2px #{rgba(#0b1220, 0.06)};
+  --sid-shadow: 0 2px 8px #{rgba(#0b1220, 0.08)};
+  --sid-shadow-lg: 0 12px 32px #{rgba(#0b1220, 0.14)};
+}
+
+// --- 5. Base ---------------------------------------------------------------
+html,
+body {
+  height: 100%;
+}
+
+body {
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+// Foco visible y consistente: requisito de accesibilidad en sistemas públicos.
+:focus-visible {
+  outline: 2px solid $guinda-500;
+  outline-offset: 2px;
+}
+
+// --- 6. Utilidades compartidas --------------------------------------------
+.text-muted-2 {
+  color: var(--sid-muted) !important;
+}
+
+.sid-card {
+  background: var(--sid-surface);
+  border: 1px solid var(--sid-border);
+  border-radius: 0.75rem;
+  box-shadow: var(--sid-shadow-sm);
+}
+
+.sid-page-title {
+  font-size: 1.375rem;
+  margin: 0;
+}
+
+// Encabezados de tabla discretos pero jerárquicos.
+.table > thead th {
+  background: $gris-superficie;
+  color: $guinda-900;
+  border-bottom: 2px solid var(--sid-border);
+  font-size: 0.8125rem;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.table > tbody td {
+  vertical-align: middle;
+}
+
+// Toda tabla ancha se desplaza dentro de su contenedor, nunca la página.
+.sid-table-wrap {
+  overflow-x: auto;
+}
+
+// Insignias de estado con suficiente contraste sobre fondo claro.
+.badge-estado {
+  font-weight: 600;
+  font-size: 0.75rem;
+  padding: 0.35em 0.7em;
+  border-radius: 999px;
+}
+
+.btn-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2rem;
+  height: 2rem;
+  padding: 0;
+}
+
+// Permite que `text-truncate` funcione dentro de contenedores flex.
+.min-w-0 {
+  min-width: 0;
+}
+
+// Icono de los indicadores del tablero.
+.sid-kpi__icono {
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+  width: 2.75rem;
+  height: 2.75rem;
+  border-radius: 0.65rem;
+  font-size: 1.2rem;
+}
+
+// Tarjeta interactiva: eleva ligeramente al apuntar.
+a.sid-card {
+  transition:
+    box-shadow 0.15s ease,
+    transform 0.15s ease;
+
+  &:hover {
+    box-shadow: var(--sid-shadow);
+    transform: translateY(-1px);
+  }
+}
+
+// Números tabulares en columnas de folios y cantidades.
+.tabular {
+  font-variant-numeric: tabular-nums;
+}

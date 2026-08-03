@@ -1,0 +1,111 @@
+@if (cargando()) {
+  <sid-cargando mensaje="Cargando solicitud…" />
+} @else if (!solicitud()) {
+  <div class="alert alert-warning">No fue posible cargar la solicitud.</div>
+} @else {
+  <sid-page-header
+    [titulo]="solicitud()!.titulo_doc ?? 'Solicitud'"
+    [descripcion]="'Folio ' + (solicitud()!.folio ?? '—')"
+    [migas]="[
+      { etiqueta: 'Documentación', ruta: '/solicitudes/entrada' },
+      { etiqueta: 'Detalle' },
+    ]"
+  >
+    <button type="button" class="btn btn-outline-secondary" (click)="regresar()">
+      <i class="bi bi-arrow-left me-1" aria-hidden="true"></i>Regresar
+    </button>
+
+    @if (miTurno() && !miTurno()!.status_atencion) {
+      <button type="button" class="btn btn-success" (click)="atender()">
+        <i class="bi bi-check2-circle me-1" aria-hidden="true"></i>Marcar como atendida
+      </button>
+    }
+  </sid-page-header>
+
+  <div class="row g-3">
+    <div class="col-12 col-lg-7">
+      <section class="sid-card p-4 h-100">
+        <h2 class="h6 mb-3">Datos de la solicitud</h2>
+
+        <dl class="row mb-0 small">
+          <dt class="col-sm-4 text-muted-2 fw-normal">Folio</dt>
+          <dd class="col-sm-8 tabular fw-semibold">{{ solicitud()!.folio ?? '—' }}</dd>
+
+          <dt class="col-sm-4 text-muted-2 fw-normal">Asunto</dt>
+          <dd class="col-sm-8">{{ solicitud()!.titulo_doc ?? '—' }}</dd>
+
+          <dt class="col-sm-4 text-muted-2 fw-normal">Remitente</dt>
+          <dd class="col-sm-8">{{ solicitud()!.remitente }}</dd>
+
+          <dt class="col-sm-4 text-muted-2 fw-normal">Fecha de recepción</dt>
+          <dd class="col-sm-8 tabular">
+            {{ solicitud()!.fecha_recepcion | date: 'dd/MM/yyyy' }}
+          </dd>
+
+          <dt class="col-sm-4 text-muted-2 fw-normal">Fecha del documento</dt>
+          <dd class="col-sm-8 tabular">
+            {{ solicitud()!.fecha_documento | date: 'dd/MM/yyyy' }}
+          </dd>
+
+          <dt class="col-sm-4 text-muted-2 fw-normal">Fecha límite</dt>
+          <dd class="col-sm-8 tabular fw-semibold">
+            {{ solicitud()!.fecha_limite_atencion | date: 'dd/MM/yyyy' }}
+          </dd>
+
+          <dt class="col-sm-4 text-muted-2 fw-normal">Fojas</dt>
+          <dd class="col-sm-8 tabular mb-0">{{ solicitud()!.fojas ?? '—' }}</dd>
+        </dl>
+      </section>
+    </div>
+
+    <!-- Trazabilidad de los turnos -->
+    <div class="col-12 col-lg-5">
+      <section class="sid-card h-100">
+        <div class="px-3 py-3 border-bottom">
+          <h2 class="h6 mb-0">Turnos</h2>
+        </div>
+
+        <ul class="list-unstyled mb-0">
+          @for (turno of solicitud()!.atenciones; track turno.id) {
+            <li class="px-3 py-3 border-bottom">
+              <div class="d-flex justify-content-between align-items-start gap-2">
+                <div class="min-w-0">
+                  <p class="mb-0 fw-semibold small text-truncate">{{ turno.nombre }}</p>
+                  <p class="mb-0 text-muted-2" style="font-size: 0.73rem">
+                    Turnado por {{ turno.turnado_por ?? '—' }}
+                  </p>
+                </div>
+
+                @if (turno.status_atencion) {
+                  <span class="badge badge-estado text-success-emphasis bg-success-subtle">
+                    Atendida
+                  </span>
+                } @else if (turno.visto) {
+                  <span class="badge badge-estado text-warning-emphasis bg-warning-subtle">
+                    Vista
+                  </span>
+                } @else {
+                  <span class="badge badge-estado text-secondary-emphasis bg-secondary-subtle">
+                    Sin abrir
+                  </span>
+                }
+              </div>
+
+              @if (turno.instruccion) {
+                <p class="mb-0 mt-2 small fst-italic text-body-secondary">
+                  «{{ turno.instruccion }}»
+                </p>
+              }
+
+              @if (turno.fecha_atencion) {
+                <p class="mb-0 mt-1 text-muted-2" style="font-size: 0.72rem">
+                  Atendida el {{ turno.fecha_atencion | date: 'dd/MM/yyyy HH:mm' }}
+                </p>
+              }
+            </li>
+          }
+        </ul>
+      </section>
+    </div>
+  </div>
+}

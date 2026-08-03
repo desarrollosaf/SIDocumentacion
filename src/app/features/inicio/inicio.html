@@ -1,0 +1,158 @@
+<!-- Bienvenida institucional -->
+<section class="sid-hero mb-4">
+  <div class="sid-hero__texto">
+    <p class="sid-hero__saludo">{{ saludo() }},</p>
+    <h1 class="sid-hero__nombre">{{ usuario()?.nombre }}</h1>
+    <p class="sid-hero__area">
+      <i class="bi bi-shield-check me-1" aria-hidden="true"></i>
+      {{ usuario()?.departamento ?? usuario()?.direccion ?? usuario()?.dependencia }}
+    </p>
+  </div>
+
+  <div class="sid-hero__fecha">
+    <p class="sid-hero__hora">{{ hora() }}</p>
+    <p class="sid-hero__dia text-capitalize">{{ hoy | date: 'EEEE, d \'de\' MMMM \'de\' y' }}</p>
+  </div>
+</section>
+
+<!-- Indicadores -->
+<div class="row g-3 mb-4">
+  <div class="col-6 col-xl-3">
+    <a routerLink="/oficios/entrada" class="sid-card sid-kpi sid-kpi--guinda p-3 h-100 d-block text-decoration-none text-body">
+      <div class="d-flex align-items-center gap-3">
+        <span class="sid-kpi__icono sid-kpi__icono--guinda">
+          <i class="bi bi-inbox" aria-hidden="true"></i>
+        </span>
+        <div>
+          <p class="h3 mb-0 fw-semibold tabular">{{ resumenOficios()?.entradaPendientes ?? '—' }}</p>
+          <p class="text-muted-2 small mb-0">Oficios por atender</p>
+        </div>
+      </div>
+    </a>
+  </div>
+
+  <div class="col-6 col-xl-3">
+    <a routerLink="/solicitudes/entrada" class="sid-card sid-kpi sid-kpi--azul p-3 h-100 d-block text-decoration-none text-body">
+      <div class="d-flex align-items-center gap-3">
+        <span class="sid-kpi__icono sid-kpi__icono--azul">
+          <i class="bi bi-file-earmark-text" aria-hidden="true"></i>
+        </span>
+        <div>
+          <p class="h3 mb-0 fw-semibold tabular">{{ resumenSolicitudes()?.pendientes ?? '—' }}</p>
+          <p class="text-muted-2 small mb-0">Solicitudes turnadas</p>
+        </div>
+      </div>
+    </a>
+  </div>
+
+  <div class="col-6 col-xl-3">
+    <a routerLink="/solicitudes/entrada" class="sid-card sid-kpi sid-kpi--naranja p-3 h-100 d-block text-decoration-none text-body">
+      <div class="d-flex align-items-center gap-3">
+        <span class="sid-kpi__icono sid-kpi__icono--naranja">
+          <i class="bi bi-exclamation-triangle" aria-hidden="true"></i>
+        </span>
+        <div>
+          <p class="h3 mb-0 fw-semibold tabular">{{ resumenSolicitudes()?.vencidas ?? '—' }}</p>
+          <p class="text-muted-2 small mb-0">Fuera de plazo</p>
+        </div>
+      </div>
+    </a>
+  </div>
+
+  <div class="col-6 col-xl-3">
+    <a routerLink="/oficios/salida" class="sid-card sid-kpi sid-kpi--verde p-3 h-100 d-block text-decoration-none text-body">
+      <div class="d-flex align-items-center gap-3">
+        <span class="sid-kpi__icono sid-kpi__icono--verde">
+          <i class="bi bi-send" aria-hidden="true"></i>
+        </span>
+        <div>
+          <p class="h3 mb-0 fw-semibold tabular">{{ resumenOficios()?.salidaTotal ?? '—' }}</p>
+          <p class="text-muted-2 small mb-0">Oficios enviados</p>
+        </div>
+      </div>
+    </a>
+  </div>
+</div>
+
+<div class="row g-3">
+  <!-- Oficios recientes -->
+  <div class="col-12 col-xl-6">
+    <section class="sid-card h-100">
+      <div class="d-flex align-items-center justify-content-between px-3 py-3 border-bottom">
+        <h2 class="h6 mb-0">Oficios por atender</h2>
+        <a routerLink="/oficios/entrada" class="small text-decoration-none">Ver bandeja</a>
+      </div>
+
+      @if (cargando()) {
+        <sid-cargando />
+      } @else if (!ultimosOficios().length) {
+        <sid-empty-state
+          titulo="Sin oficios pendientes"
+          descripcion="No tienes oficios en espera de atención."
+          icono="bi-check2-circle"
+        />
+      } @else {
+        <ul class="list-unstyled mb-0">
+          @for (oficio of ultimosOficios(); track oficio.id) {
+            <li class="px-3 py-3 border-bottom">
+              <a
+                [routerLink]="['/oficios', oficio.id]"
+                class="d-flex justify-content-between gap-3 text-decoration-none text-body"
+              >
+                <span class="min-w-0">
+                  <span class="d-block fw-semibold text-truncate">{{ oficio.titulo_doc }}</span>
+                  <span class="d-block text-muted-2 small">
+                    {{ oficio.folio }} · {{ oficio.contraparte }}
+                  </span>
+                </span>
+                <sid-estado-badge [atendido]="oficio.atendido" [visto]="oficio.visto" />
+              </a>
+            </li>
+          }
+        </ul>
+      }
+    </section>
+  </div>
+
+  <!-- Solicitudes recientes -->
+  <div class="col-12 col-xl-6">
+    <section class="sid-card h-100">
+      <div class="d-flex align-items-center justify-content-between px-3 py-3 border-bottom">
+        <h2 class="h6 mb-0">Solicitudes turnadas</h2>
+        <a routerLink="/solicitudes/entrada" class="small text-decoration-none">Ver bandeja</a>
+      </div>
+
+      @if (!ultimasSolicitudes().length) {
+        <sid-empty-state
+          titulo="Sin solicitudes pendientes"
+          descripcion="No tienes solicitudes turnadas en espera."
+          icono="bi-check2-circle"
+        />
+      } @else {
+        <ul class="list-unstyled mb-0">
+          @for (solicitud of ultimasSolicitudes(); track solicitud.id) {
+            <li class="px-3 py-3 border-bottom">
+              <a
+                [routerLink]="['/solicitudes', solicitud.id]"
+                class="d-flex justify-content-between gap-3 text-decoration-none text-body"
+              >
+                <span class="min-w-0">
+                  <span class="d-block fw-semibold text-truncate">{{ solicitud.titulo_doc }}</span>
+                  <span class="d-block text-muted-2 small">
+                    {{ solicitud.folio }} · vence
+                    {{ solicitud.fecha_limite_atencion | date: 'dd/MM/yyyy' }}
+                  </span>
+                </span>
+                <sid-estado-badge
+                  [atendido]="solicitud.atendido"
+                  [visto]="solicitud.visto"
+                  [diasRestantes]="solicitud.dias_restantes"
+                />
+              </a>
+            </li>
+          }
+        </ul>
+      }
+    </section>
+  </div>
+</div>

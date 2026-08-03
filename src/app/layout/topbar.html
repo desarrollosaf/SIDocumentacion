@@ -1,0 +1,130 @@
+<header class="sid-topbar">
+  <button
+    type="button"
+    class="btn btn-link sid-topbar__toggle"
+    aria-label="Alternar menú de navegación"
+    (click)="alternarMenu.emit()"
+  >
+    <i class="bi bi-list" aria-hidden="true"></i>
+  </button>
+
+  <!-- Adscripción del usuario: contexto permanente, como en el sistema original -->
+  <div class="sid-topbar__contexto d-none d-md-block">
+    <p class="mb-0 fw-semibold small">{{ usuario()?.dependencia ?? 'Dependencia' }}</p>
+    <p class="mb-0 text-muted-2" style="font-size: 0.75rem">
+      {{ usuario()?.direccion ?? '—' }}
+      @if (usuario()?.departamento) {
+        · {{ usuario()?.departamento }}
+      }
+    </p>
+  </div>
+
+  <div class="ms-auto d-flex align-items-center gap-1">
+    <!-- Pendientes -->
+    <div class="position-relative">
+      <button
+        type="button"
+        class="btn btn-link sid-topbar__accion"
+        [attr.aria-expanded]="panelAvisosAbierto()"
+        aria-label="Documentos pendientes"
+        (click)="alternarAvisos()"
+      >
+        <i class="bi bi-bell" aria-hidden="true"></i>
+        @if (totalPendientes() > 0) {
+          <span class="sid-topbar__contador">{{ totalPendientes() }}</span>
+        }
+      </button>
+
+      @if (panelAvisosAbierto()) {
+        <div class="sid-panel">
+          <p class="sid-panel__titulo">Pendientes de atención</p>
+
+          <a
+            routerLink="/oficios/entrada"
+            class="sid-panel__item"
+            (click)="cerrarPaneles()"
+          >
+            <i class="bi bi-inbox text-primary" aria-hidden="true"></i>
+            <span>Oficios sin atender</span>
+            <strong>{{ resumenOficios()?.entradaPendientes ?? 0 }}</strong>
+          </a>
+
+          <a
+            routerLink="/solicitudes/entrada"
+            class="sid-panel__item"
+            (click)="cerrarPaneles()"
+          >
+            <i class="bi bi-file-earmark-text text-primary" aria-hidden="true"></i>
+            <span>Solicitudes turnadas</span>
+            <strong>{{ resumenSolicitudes()?.pendientes ?? 0 }}</strong>
+          </a>
+
+          @if ((resumenSolicitudes()?.vencidas ?? 0) > 0) {
+            <a
+              routerLink="/solicitudes/entrada"
+              class="sid-panel__item text-danger-emphasis"
+              (click)="cerrarPaneles()"
+            >
+              <i class="bi bi-exclamation-triangle-fill" aria-hidden="true"></i>
+              <span>Fuera de plazo</span>
+              <strong>{{ resumenSolicitudes()?.vencidas }}</strong>
+            </a>
+          }
+        </div>
+      }
+    </div>
+
+    <!-- Cuenta -->
+    <div class="position-relative">
+      <button
+        type="button"
+        class="btn btn-link sid-topbar__cuenta"
+        [attr.aria-expanded]="menuCuentaAbierto()"
+        (click)="alternarCuenta()"
+      >
+        <span class="sid-topbar__avatar" aria-hidden="true">{{ iniciales() }}</span>
+        <span class="d-none d-lg-flex flex-column text-start lh-sm">
+          <span class="fw-semibold small text-truncate" style="max-width: 12rem">
+            {{ usuario()?.nombre }}
+          </span>
+          <span class="text-muted-2" style="font-size: 0.72rem">{{ usuario()?.rfc }}</span>
+        </span>
+        <i class="bi bi-chevron-down small d-none d-lg-inline" aria-hidden="true"></i>
+      </button>
+
+      @if (menuCuentaAbierto()) {
+        <div class="sid-panel sid-panel--cuenta">
+          <div class="sid-panel__perfil">
+            <p class="fw-semibold mb-0 small">{{ usuario()?.nombre }}</p>
+            <p class="text-muted-2 mb-2" style="font-size: 0.75rem">
+              {{ usuario()?.email ?? usuario()?.rfc }}
+            </p>
+            @for (rol of usuario()?.roles ?? []; track rol) {
+              <span class="badge text-bg-secondary me-1 mb-1">{{ rol }}</span>
+            }
+          </div>
+
+          <a routerLink="/perfil" class="sid-panel__item" (click)="cerrarPaneles()">
+            <i class="bi bi-person" aria-hidden="true"></i>
+            <span>Mi perfil</span>
+          </a>
+
+          <a routerLink="/perfil/contrasena" class="sid-panel__item" (click)="cerrarPaneles()">
+            <i class="bi bi-key" aria-hidden="true"></i>
+            <span>Cambiar contraseña</span>
+          </a>
+
+          <button type="button" class="sid-panel__item text-danger" (click)="cerrarSesion()">
+            <i class="bi bi-box-arrow-right" aria-hidden="true"></i>
+            <span>Cerrar sesión</span>
+          </button>
+        </div>
+      }
+    </div>
+  </div>
+</header>
+
+<!-- Capa transparente para cerrar los paneles al hacer clic fuera -->
+@if (menuCuentaAbierto() || panelAvisosAbierto()) {
+  <div class="sid-overlay-click" (click)="cerrarPaneles()"></div>
+}

@@ -1,0 +1,33 @@
+<div class="sid-shell" [class.is-collapsed]="colapsado()">
+  <sid-sidebar
+    [colapsado]="colapsado()"
+    [abiertoMovil]="abiertoMovil()"
+    (navegar)="cerrarMovil()"
+  />
+
+  <!-- Fondo oscurecido cuando el panel deslizante está abierto en móvil -->
+  @if (abiertoMovil()) {
+    <div class="sid-shell__backdrop" (click)="cerrarMovil()"></div>
+  }
+
+  <div class="sid-shell__main">
+    <sid-topbar
+      [resumenOficios]="resumenOficios()"
+      [resumenSolicitudes]="resumenSolicitudes()"
+      (alternarMenu)="alternarMenu()"
+    />
+
+    <main class="sid-shell__content">
+      <div class="container-fluid px-3 px-lg-4 py-4">
+        <router-outlet />
+      </div>
+    </main>
+
+    <footer class="sid-shell__footer">
+      <span>Sistema Institucional de Documentación</span>
+      <span class="text-muted-2">v1.0</span>
+    </footer>
+  </div>
+</div>
+
+<sid-avisos />

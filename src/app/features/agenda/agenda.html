@@ -1,0 +1,121 @@
+<sid-page-header
+  titulo="Agenda"
+  descripcion="Fechas límite de atención de las solicitudes registradas."
+  [migas]="[{ etiqueta: 'Documentación' }, { etiqueta: 'Agenda' }]"
+>
+  <button type="button" class="btn btn-outline-secondary" (click)="irAHoy()">Hoy</button>
+</sid-page-header>
+
+<div class="row g-3">
+  <div class="col-12 col-xl-8">
+    <section class="sid-card">
+      <!-- Control del mes -->
+      <div class="d-flex align-items-center justify-content-between px-3 py-3 border-bottom">
+        <button
+          type="button"
+          class="btn btn-sm btn-outline-secondary btn-icon"
+          aria-label="Mes anterior"
+          (click)="mesAnterior()"
+        >
+          <i class="bi bi-chevron-left" aria-hidden="true"></i>
+        </button>
+
+        <h2 class="h6 mb-0 text-capitalize">{{ etiquetaMes() }}</h2>
+
+        <button
+          type="button"
+          class="btn btn-sm btn-outline-secondary btn-icon"
+          aria-label="Mes siguiente"
+          (click)="mesSiguiente()"
+        >
+          <i class="bi bi-chevron-right" aria-hidden="true"></i>
+        </button>
+      </div>
+
+      @if (cargando()) {
+        <sid-cargando mensaje="Cargando agenda…" />
+      } @else {
+        <div class="sid-calendario">
+          @for (dia of diasSemana; track dia) {
+            <div class="sid-calendario__encabezado">{{ dia }}</div>
+          }
+
+          @for (celda of celdas(); track celda.fecha.getTime()) {
+            <button
+              type="button"
+              class="sid-calendario__celda"
+              [class.is-fuera]="!celda.delMes"
+              [class.is-hoy]="celda.esHoy"
+              [class.is-activa]="diaSeleccionado()?.fecha === celda.fecha"
+              [attr.aria-label]="(celda.fecha | date: 'fullDate') + ', ' + celda.eventos.length + ' eventos'"
+              (click)="seleccionar(celda)"
+            >
+              <span class="sid-calendario__numero">{{ celda.fecha.getDate() }}</span>
+
+              <span class="sid-calendario__marcas">
+                @for (evento of celda.eventos.slice(0, 3); track evento.id) {
+                  <span
+                    class="sid-calendario__punto"
+                    [style.background]="evento.color ?? '#73162f'"
+                  ></span>
+                }
+                @if (celda.eventos.length > 3) {
+                  <span class="sid-calendario__mas">+{{ celda.eventos.length - 3 }}</span>
+                }
+              </span>
+            </button>
+          }
+        </div>
+      }
+    </section>
+  </div>
+
+  <!-- Detalle del día -->
+  <div class="col-12 col-xl-4">
+    <section class="sid-card h-100">
+      <div class="px-3 py-3 border-bottom">
+        <h2 class="h6 mb-0">
+          @if (diaSeleccionado()) {
+            {{ diaSeleccionado()!.fecha | date: 'EEEE d \'de\' MMMM' }}
+          } @else {
+            Eventos del día
+          }
+        </h2>
+      </div>
+
+      @if (!diaSeleccionado()) {
+        <sid-empty-state
+          titulo="Selecciona un día"
+          descripcion="Elige una fecha marcada en el calendario para ver sus solicitudes."
+          icono="bi-calendar3"
+        />
+      } @else {
+        <ul class="list-unstyled mb-0">
+          @for (evento of diaSeleccionado()!.eventos; track evento.id) {
+            <li class="px-3 py-3 border-bottom">
+              <div class="d-flex gap-2">
+                <span
+                  class="sid-calendario__barra"
+                  [style.background]="evento.color ?? '#73162f'"
+                ></span>
+                <div class="min-w-0">
+                  <p class="mb-0 fw-semibold small tabular">{{ evento.title }}</p>
+                  <p class="mb-1 text-muted-2 small">{{ evento.descripcion }}</p>
+                  @if (evento.registro_id) {
+                    <a
+                      [routerLink]="['/solicitudes', evento.registro_id]"
+                      class="small text-decoration-none"
+                    >
+                      Ver solicitud
+                      <i class="bi bi-arrow-right-short" aria-hidden="true"></i>
+                    </a>
+                  }
+                </div>
+              </div>
+            </li>
+          }
+        </ul>
+      }
+    </section>
+  </div>
+</div>

@@ -1,0 +1,94 @@
+.sid-calendario {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  gap: 1px;
+  padding: 1px;
+  background: var(--sid-border);
+
+  &__encabezado {
+    padding: 0.5rem 0.25rem;
+    background: var(--bs-light);
+    color: var(--sid-muted);
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    text-align: center;
+    text-transform: uppercase;
+  }
+
+  &__celda {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.3rem;
+    min-height: 5rem;
+    padding: 0.45rem 0.25rem;
+    border: 0;
+    background: var(--sid-surface);
+    cursor: pointer;
+    transition: background-color 0.12s ease;
+
+    &:hover {
+      background: var(--sid-primary-soft);
+    }
+
+    // Días de relleno del mes anterior o siguiente.
+    &.is-fuera {
+      background: #fafbfc;
+
+      .sid-calendario__numero {
+        opacity: 0.35;
+      }
+    }
+
+    &.is-hoy .sid-calendario__numero {
+      background: var(--sid-primary);
+      color: #fff;
+    }
+
+    &.is-activa {
+      box-shadow: inset 0 0 0 2px var(--sid-primary);
+    }
+  }
+
+  &__numero {
+    display: grid;
+    place-items: center;
+    width: 1.75rem;
+    height: 1.75rem;
+    border-radius: 50%;
+    font-size: 0.83rem;
+    font-variant-numeric: tabular-nums;
+  }
+
+  &__marcas {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 0.2rem;
+  }
+
+  &__punto {
+    width: 0.45rem;
+    height: 0.45rem;
+    border-radius: 50%;
+  }
+
+  &__mas {
+    font-size: 0.65rem;
+    color: var(--sid-muted);
+  }
+
+  &__barra {
+    flex-shrink: 0;
+    width: 3px;
+    border-radius: 2px;
+  }
+}
+
+@media (max-width: 575.98px) {
+  .sid-calendario__celda {
+    min-height: 3.75rem;
+  }
+}

@@ -1,0 +1,83 @@
+<aside
+  class="sid-sidebar"
+  [class.is-collapsed]="colapsado()"
+  [class.is-open]="abiertoMovil()"
+>
+  <!-- Identidad institucional -->
+  <div class="sid-brand">
+    <span class="sid-brand__mark" aria-hidden="true">
+      <i class="bi bi-archive-fill"></i>
+    </span>
+    <span class="sid-brand__text">
+      <strong>{{ appName }}</strong>
+      <small>{{ institucion }}</small>
+    </span>
+  </div>
+
+  <!-- Identificación permanente de quien opera el sistema -->
+  <div class="sid-usuario">
+    <span class="sid-usuario__avatar" aria-hidden="true">{{ iniciales() }}</span>
+    <span class="sid-usuario__datos">
+      <strong>{{ usuario()?.nombre }}</strong>
+      <span>{{ usuario()?.roles?.[0] ?? usuario()?.rfc }}</span>
+    </span>
+  </div>
+
+  <nav class="sid-nav" aria-label="Navegación principal">
+    @if (!hayMenu()) {
+      <p class="sid-nav__empty">Cargando menú…</p>
+    }
+
+    @for (item of items(); track item.name ?? item.navheader) {
+      @if (item.navheader) {
+        <p class="sid-nav__header">{{ item.navheader }}</p>
+      } @else if (item.submenu?.length) {
+        <!-- Grupo desplegable -->
+        <button
+          type="button"
+          class="sid-nav__link sid-nav__link--group"
+          [class.is-expanded]="estaAbierto(item)"
+          [attr.aria-expanded]="estaAbierto(item)"
+          [title]="item.name"
+          (click)="alternarGrupo(item)"
+        >
+          <i class="bi sid-nav__icon" [class]="item.icon" aria-hidden="true"></i>
+          <span class="sid-nav__label">{{ item.name }}</span>
+          <i class="bi bi-chevron-down sid-nav__chevron" aria-hidden="true"></i>
+        </button>
+
+        @if (estaAbierto(item)) {
+          <div class="sid-nav__submenu">
+            @for (hijo of item.submenu; track hijo.url) {
+              <a
+                class="sid-nav__link sid-nav__link--child"
+                [routerLink]="hijo.url"
+                routerLinkActive="is-active"
+                [title]="hijo.name"
+                (click)="alNavegar()"
+              >
+                <i class="bi sid-nav__icon" [class]="hijo.icon" aria-hidden="true"></i>
+                <span class="sid-nav__label">{{ hijo.name }}</span>
+              </a>
+            }
+          </div>
+        }
+      } @else if (item.url) {
+        <a
+          class="sid-nav__link"
+          [routerLink]="item.url"
+          routerLinkActive="is-active"
+          [title]="item.name"
+          (click)="alNavegar()"
+        >
+          <i class="bi sid-nav__icon" [class]="item.icon" aria-hidden="true"></i>
+          <span class="sid-nav__label">{{ item.name }}</span>
+        </a>
+      }
+    }
+  </nav>
+
+  <div class="sid-sidebar__footer">
+    <span class="sid-nav__label">Sistema Institucional de Documentación</span>
+  </div>
+</aside>

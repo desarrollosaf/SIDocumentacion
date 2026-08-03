@@ -1,0 +1,152 @@
+:host {
+  display: contents;
+}
+
+.sid-topbar {
+  position: sticky;
+  top: 0;
+  z-index: 1030;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  height: var(--sid-topbar-height);
+  padding-inline: 0.75rem 1rem;
+  background: var(--sid-surface);
+  border-bottom: 1px solid var(--sid-border);
+  box-shadow: var(--sid-shadow-sm);
+
+  &__toggle,
+  &__accion {
+    display: grid;
+    place-items: center;
+    width: 2.5rem;
+    height: 2.5rem;
+    padding: 0;
+    border-radius: 0.5rem;
+    color: var(--bs-body-color);
+    font-size: 1.25rem;
+    text-decoration: none;
+
+    &:hover {
+      background: var(--bs-light);
+      color: var(--sid-primary);
+    }
+  }
+
+  &__contexto {
+    min-width: 0;
+    padding-inline-start: 0.25rem;
+    border-inline-start: 3px solid var(--sid-primary);
+    padding-block: 0.15rem;
+    padding-inline-start: 0.6rem;
+  }
+
+  &__accion {
+    position: relative;
+  }
+
+  // Contador de pendientes sobre la campana.
+  &__contador {
+    position: absolute;
+    top: 0.25rem;
+    inset-inline-end: 0.2rem;
+    min-width: 1.15rem;
+    padding: 0 0.28rem;
+    border-radius: 999px;
+    background: var(--bs-danger);
+    color: #fff;
+    font-size: 0.68rem;
+    font-weight: 700;
+    line-height: 1.15rem;
+    text-align: center;
+  }
+
+  &__cuenta {
+    display: flex;
+    align-items: center;
+    gap: 0.55rem;
+    padding: 0.3rem 0.5rem;
+    border-radius: 0.5rem;
+    color: var(--bs-body-color);
+    text-decoration: none;
+
+    &:hover {
+      background: var(--bs-light);
+    }
+  }
+
+  &__avatar {
+    display: grid;
+    place-items: center;
+    width: 2.1rem;
+    height: 2.1rem;
+    flex-shrink: 0;
+    border-radius: 50%;
+    background: var(--sid-primary);
+    color: #fff;
+    font-size: 0.8rem;
+    font-weight: 700;
+  }
+}
+
+// --- Paneles desplegables --------------------------------------------------
+.sid-panel {
+  position: absolute;
+  top: calc(100% + 0.4rem);
+  inset-inline-end: 0;
+  z-index: 1050;
+  min-width: 17rem;
+  padding: 0.5rem;
+  background: var(--sid-surface);
+  border: 1px solid var(--sid-border);
+  border-radius: 0.65rem;
+  box-shadow: var(--sid-shadow-lg);
+
+  &__titulo {
+    margin: 0.25rem 0.5rem 0.5rem;
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--sid-muted);
+  }
+
+  &__perfil {
+    padding: 0.5rem 0.6rem 0.65rem;
+    margin-bottom: 0.35rem;
+    border-bottom: 1px solid var(--sid-border);
+  }
+
+  &__item {
+    display: flex;
+    align-items: center;
+    gap: 0.65rem;
+    width: 100%;
+    padding: 0.5rem 0.6rem;
+    border: 0;
+    border-radius: 0.45rem;
+    background: transparent;
+    color: inherit;
+    font-size: 0.86rem;
+    text-align: start;
+    text-decoration: none;
+
+    &:hover {
+      background: var(--sid-primary-soft);
+    }
+
+    span {
+      flex: 1;
+    }
+
+    strong {
+      font-variant-numeric: tabular-nums;
+    }
+  }
+}
+
+.sid-overlay-click {
+  position: fixed;
+  inset: 0;
+  z-index: 1045;
+}

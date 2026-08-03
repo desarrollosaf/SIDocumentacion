@@ -1,0 +1,95 @@
+.sid-login {
+  display: grid;
+  grid-template-columns: 1.05fr 1fr;
+  min-height: 100vh;
+}
+
+// --- Panel de identidad ----------------------------------------------------
+.sid-login__marca {
+  position: relative;
+  align-items: center;
+  padding: 3rem;
+  overflow: hidden;
+  background: linear-gradient(155deg, #4a0d21 0%, #73162f 55%, #8a1c38 100%);
+
+  // Trama diagonal sutil: da textura sin competir con el contenido.
+  &::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background-image: repeating-linear-gradient(
+      45deg,
+      rgb(255 255 255 / 0.04) 0 2px,
+      transparent 2px 16px
+    );
+    pointer-events: none;
+  }
+}
+
+.sid-login__marca-contenido {
+  position: relative;
+  z-index: 1;
+  max-width: 30rem;
+  margin-inline: auto;
+}
+
+.sid-login__logo {
+  display: grid;
+  place-items: center;
+  width: 4rem;
+  height: 4rem;
+  border-radius: 1rem;
+  background: #bf9a2e;
+  color: #4a0d21;
+  font-size: 1.85rem;
+
+  &--compacto {
+    margin-inline: auto;
+    width: 3.25rem;
+    height: 3.25rem;
+    font-size: 1.45rem;
+  }
+}
+
+.sid-login__lista {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 1rem;
+
+  li {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.85rem;
+    color: rgb(255 255 255 / 0.85);
+    font-size: 0.9rem;
+    line-height: 1.5;
+  }
+
+  i {
+    flex-shrink: 0;
+    margin-top: 0.15rem;
+    color: #d9b756;
+    font-size: 1.05rem;
+  }
+}
+
+// --- Panel del formulario --------------------------------------------------
+.sid-login__formulario {
+  display: grid;
+  place-items: center;
+  padding: 2rem 1.5rem;
+  background: var(--sid-surface);
+}
+
+.sid-login__caja {
+  width: 100%;
+  max-width: 24rem;
+}
+
+@media (max-width: 991.98px) {
+  .sid-login {
+    grid-template-columns: 1fr;
+  }
+}

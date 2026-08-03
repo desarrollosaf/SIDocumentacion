@@ -1,0 +1,126 @@
+<div class="sid-login">
+  <!-- Columna de identidad institucional -->
+  <section class="sid-login__marca d-none d-lg-flex">
+    <div class="sid-login__marca-contenido">
+      <span class="sid-login__logo" aria-hidden="true">
+        <i class="bi bi-archive-fill"></i>
+      </span>
+
+      <h1 class="h2 text-white fw-semibold mt-4 mb-2">{{ appName }}</h1>
+      <p class="text-white-50 mb-5">{{ institucion }}</p>
+
+      <ul class="sid-login__lista">
+        <li>
+          <i class="bi bi-inboxes" aria-hidden="true"></i>
+          Control de bandejas de entrada y salida de documentos oficiales
+        </li>
+        <li>
+          <i class="bi bi-vector-pen" aria-hidden="true"></i>
+          Firma electrónica y acuse de recibo de oficios
+        </li>
+        <li>
+          <i class="bi bi-diagram-3" aria-hidden="true"></i>
+          Clasificación archivística por sección, serie y subserie
+        </li>
+        <li>
+          <i class="bi bi-calendar-check" aria-hidden="true"></i>
+          Seguimiento de plazos de atención
+        </li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- Columna del formulario -->
+  <section class="sid-login__formulario">
+    <div class="sid-login__caja">
+      <div class="text-center d-lg-none mb-4">
+        <span class="sid-login__logo sid-login__logo--compacto" aria-hidden="true">
+          <i class="bi bi-archive-fill"></i>
+        </span>
+        <h1 class="h4 mt-3 mb-1">{{ appName }}</h1>
+        <p class="text-muted-2 small mb-0">{{ institucion }}</p>
+      </div>
+
+      <h2 class="h5 mb-1">Iniciar sesión</h2>
+      <p class="text-muted-2 small mb-4">
+        Accede con tu RFC institucional o correo electrónico.
+      </p>
+
+      @if (errorLogin()) {
+        <div class="alert alert-danger d-flex gap-2 py-2 small" role="alert">
+          <i class="bi bi-exclamation-octagon-fill" aria-hidden="true"></i>
+          <span>{{ errorLogin() }}</span>
+        </div>
+      }
+
+      <form [formGroup]="formulario" (ngSubmit)="enviar()" novalidate>
+        <div class="mb-3">
+          <label for="usuario" class="form-label">RFC o correo electrónico</label>
+          <div class="input-group">
+            <span class="input-group-text">
+              <i class="bi bi-person" aria-hidden="true"></i>
+            </span>
+            <input
+              id="usuario"
+              type="text"
+              class="form-control"
+              formControlName="usuario"
+              autocomplete="username"
+              placeholder="AAAA000000AAA"
+              [class.is-invalid]="
+                formulario.controls.usuario.touched && formulario.controls.usuario.invalid
+              "
+            />
+          </div>
+          @if (formulario.controls.usuario.touched && formulario.controls.usuario.invalid) {
+            <p class="text-danger small mt-1 mb-0">Captura tu RFC o correo institucional.</p>
+          }
+        </div>
+
+        <div class="mb-4">
+          <label for="password" class="form-label">Contraseña</label>
+          <div class="input-group">
+            <span class="input-group-text">
+              <i class="bi bi-lock" aria-hidden="true"></i>
+            </span>
+            <input
+              id="password"
+              [type]="mostrarPassword() ? 'text' : 'password'"
+              class="form-control"
+              formControlName="password"
+              autocomplete="current-password"
+              [class.is-invalid]="
+                formulario.controls.password.touched && formulario.controls.password.invalid
+              "
+            />
+            <button
+              type="button"
+              class="btn btn-outline-secondary"
+              [attr.aria-label]="mostrarPassword() ? 'Ocultar contraseña' : 'Mostrar contraseña'"
+              (click)="alternarPassword()"
+            >
+              <i class="bi" [class]="mostrarPassword() ? 'bi-eye-slash' : 'bi-eye'"></i>
+            </button>
+          </div>
+          @if (formulario.controls.password.touched && formulario.controls.password.invalid) {
+            <p class="text-danger small mt-1 mb-0">Captura tu contraseña.</p>
+          }
+        </div>
+
+        <button type="submit" class="btn btn-primary w-100 py-2" [disabled]="enviando()">
+          @if (enviando()) {
+            <span class="spinner-border spinner-border-sm me-2" aria-hidden="true"></span>
+            Validando…
+          } @else {
+            Entrar
+          }
+        </button>
+      </form>
+
+      <p class="text-muted-2 mt-4 mb-0" style="font-size: 0.78rem">
+        <i class="bi bi-shield-lock me-1" aria-hidden="true"></i>
+        Tras tres intentos fallidos la cuenta se bloquea por seguridad.
+      </p>
+    </div>
+  </section>
+</div>

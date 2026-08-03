@@ -1,0 +1,121 @@
+import type { AuthenticatedUser } from '../common/interfaces/authenticated-user.interface';
+import { CrearSolicitudDto } from './dto/crear-solicitud.dto';
+import { FiltroSolicitudesDto } from './dto/filtro-solicitudes.dto';
+import { SolicitudesService } from './solicitudes.service';
+export declare class SolicitudesController {
+    private readonly solicitudes;
+    constructor(solicitudes: SolicitudesService);
+    resumen(user: AuthenticatedUser): Promise<{
+        pendientes: number;
+        sinVer: number;
+        registradas: number;
+        preregistros: number;
+        vencidas: number;
+    }>;
+    entrada(user: AuthenticatedUser, filtro: FiltroSolicitudesDto): Promise<import("../common/dto/pagination.dto").Paginated<import("./solicitudes.service").SolicitudBandeja>>;
+    salida(user: AuthenticatedUser, filtro: FiltroSolicitudesDto): Promise<import("../common/dto/pagination.dto").Paginated<import("./solicitudes.service").SolicitudBandeja>>;
+    preregistro(user: AuthenticatedUser, filtro: FiltroSolicitudesDto): Promise<import("../common/dto/pagination.dto").Paginated<import("./solicitudes.service").SolicitudBandeja>>;
+    folios(user: AuthenticatedUser, filtro: FiltroSolicitudesDto): Promise<import("../common/dto/pagination.dto").Paginated<import("../entities/doc/registro.entity").Registro>>;
+    detalle(id: number): Promise<{
+        remitente: string;
+        atenciones: {
+            id: number;
+            user_rfc: string;
+            nombre: string;
+            turnado_por: string | null;
+            instruccion: string | null;
+            visto: number;
+            status_atencion: number;
+            fecha_visto: null;
+            fecha_atencion: string | null;
+        }[];
+        id: number;
+        folio: string;
+        folio_rastreo: number | null;
+        fecha_recepcion: string | null;
+        fecha_documento: string | null;
+        referencia_documento: string | null;
+        fecha_limite_atencion: string;
+        hora_atencion: string | null;
+        tipo_atencion: number;
+        serie_id: number;
+        subserie_id: number | null;
+        expediente_id: number | null;
+        titulo_doc: string;
+        descripcion_doc: string;
+        path: string | null;
+        user_registro: number;
+        remitente_rfc: string;
+        otro_remitente: string | null;
+        nombre_remitente: string | null;
+        fojas: number | null;
+        uuid: string | null;
+        firmado: number | null;
+        tipo_doc: number | null;
+        status_envio: number | null;
+        rfc_autorizado: string | null;
+        rfc_vobo: string | null;
+        status: number;
+        activo: number;
+        created_at: Date | null;
+        updated_at: Date | null;
+        serie?: import("../entities/doc/serie.entity").Serie | null;
+    }>;
+    crear(user: AuthenticatedUser, dto: CrearSolicitudDto): Promise<{
+        remitente: string;
+        atenciones: {
+            id: number;
+            user_rfc: string;
+            nombre: string;
+            turnado_por: string | null;
+            instruccion: string | null;
+            visto: number;
+            status_atencion: number;
+            fecha_visto: null;
+            fecha_atencion: string | null;
+        }[];
+        id: number;
+        folio: string;
+        folio_rastreo: number | null;
+        fecha_recepcion: string | null;
+        fecha_documento: string | null;
+        referencia_documento: string | null;
+        fecha_limite_atencion: string;
+        hora_atencion: string | null;
+        tipo_atencion: number;
+        serie_id: number;
+        subserie_id: number | null;
+        expediente_id: number | null;
+        titulo_doc: string;
+        descripcion_doc: string;
+        path: string | null;
+        user_registro: number;
+        remitente_rfc: string;
+        otro_remitente: string | null;
+        nombre_remitente: string | null;
+        fojas: number | null;
+        uuid: string | null;
+        firmado: number | null;
+        tipo_doc: number | null;
+        status_envio: number | null;
+        rfc_autorizado: string | null;
+        rfc_vobo: string | null;
+        status: number;
+        activo: number;
+        created_at: Date | null;
+        updated_at: Date | null;
+        serie?: import("../entities/doc/serie.entity").Serie | null;
+    }>;
+    autorizar(id: number): Promise<{
+        message: string;
+    }>;
+    rechazar(id: number): Promise<{
+        message: string;
+    }>;
+    marcarVisto(user: AuthenticatedUser, id: number): Promise<{
+        message: string;
+    }>;
+    atender(user: AuthenticatedUser, id: number): Promise<{
+        message: string;
+    }>;
+}

@@ -1,0 +1,124 @@
+// --- Encabezado de bienvenida ---------------------------------------------
+.sid-hero {
+  position: relative;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1.5rem;
+  padding: 1.65rem 1.85rem;
+  border-radius: 0.85rem;
+  background: var(--sid-degradado);
+  color: #fff;
+  overflow: hidden;
+  box-shadow: var(--sid-shadow);
+
+  // Trama diagonal sutil, la misma del acceso al sistema.
+  &::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background-image: repeating-linear-gradient(
+      45deg,
+      rgb(255 255 255 / 0.05) 0 2px,
+      transparent 2px 16px
+    );
+    pointer-events: none;
+  }
+
+  &__texto,
+  &__fecha {
+    position: relative;
+    z-index: 1;
+    min-width: 0;
+  }
+
+  &__saludo {
+    margin: 0;
+    font-size: 0.9rem;
+    color: rgb(255 255 255 / 0.8);
+  }
+
+  &__nombre {
+    margin: 0.15rem 0 0.4rem;
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: #fff;
+    line-height: 1.2;
+  }
+
+  &__area {
+    margin: 0;
+    font-size: 0.82rem;
+    color: rgb(255 255 255 / 0.85);
+  }
+
+  &__fecha {
+    text-align: end;
+  }
+
+  &__hora {
+    margin: 0;
+    font-size: 1.85rem;
+    font-weight: 600;
+    font-variant-numeric: tabular-nums;
+    line-height: 1;
+  }
+
+  &__dia {
+    margin: 0.35rem 0 0;
+    font-size: 0.78rem;
+    color: rgb(255 255 255 / 0.8);
+  }
+}
+
+// --- Indicadores -----------------------------------------------------------
+// Cada tarjeta se distingue por una barra de color a la izquierda y un chip
+// del mismo tono, en una paleta cálida sobre fondo claro.
+.sid-kpi {
+  border-inline-start: 4px solid var(--sid-kpi-color, var(--sid-primary));
+
+  &--guinda {
+    --sid-kpi-color: var(--sid-primary);
+  }
+  &--azul {
+    --sid-kpi-color: #1c6b8c;
+  }
+  &--naranja {
+    --sid-kpi-color: var(--sid-naranja);
+  }
+  &--verde {
+    --sid-kpi-color: #1f7a52;
+  }
+
+  &__icono {
+    color: var(--sid-kpi-color);
+
+    &--guinda {
+      background: var(--sid-primary-soft);
+    }
+    &--azul {
+      background: #e4eff5;
+    }
+    &--naranja {
+      background: var(--sid-naranja-suave);
+    }
+    &--verde {
+      background: #e3f2eb;
+    }
+  }
+}
+
+@media (max-width: 575.98px) {
+  .sid-hero {
+    padding: 1.25rem;
+
+    &__fecha {
+      text-align: start;
+    }
+
+    &__hora {
+      font-size: 1.5rem;
+    }
+  }
+}

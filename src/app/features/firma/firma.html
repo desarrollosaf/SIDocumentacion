@@ -1,0 +1,196 @@
+<sid-page-header
+  titulo="Firma de documento"
+  descripcion="Firma tus oficios con la FIEL institucional."
+  [migas]="[{ etiqueta: 'Firma de documento' }]"
+/>
+
+<section class="sid-card">
+  <div class="d-flex flex-wrap align-items-center gap-2 p-3 border-bottom">
+    <div class="btn-group btn-group-sm" role="group" aria-label="Filtrar documentos">
+      <button
+        type="button"
+        class="btn"
+        [class]="filtro() === 'pendientes' ? 'btn-primary' : 'btn-outline-secondary'"
+        (click)="filtro.set('pendientes')"
+      >
+        Por firmar
+      </button>
+      <button
+        type="button"
+        class="btn"
+        [class]="filtro() === 'firmados' ? 'btn-primary' : 'btn-outline-secondary'"
+        (click)="filtro.set('firmados')"
+      >
+        Firmados
+      </button>
+      <button
+        type="button"
+        class="btn"
+        [class]="filtro() === 'todos' ? 'btn-primary' : 'btn-outline-secondary'"
+        (click)="filtro.set('todos')"
+      >
+        Todos
+      </button>
+    </div>
+
+    <button type="button" class="btn btn-sm btn-outline-secondary ms-auto" (click)="cargar()">
+      <i class="bi bi-arrow-clockwise me-1" aria-hidden="true"></i>Actualizar
+    </button>
+  </div>
+
+  @if (cargando()) {
+    <sid-cargando mensaje="Consultando documentos…" />
+  } @else if (!visibles().length) {
+    <sid-empty-state
+      titulo="No hay documentos que mostrar"
+      descripcion="Cuando registres un oficio con archivo aparecerá aquí para firmarse."
+      icono="bi-patch-check"
+    />
+  } @else {
+    <div class="sid-table-wrap">
+      <table class="table table-hover align-middle mb-0">
+        <thead>
+          <tr>
+            <th scope="col">Folio</th>
+            <th scope="col">Documento</th>
+            <th scope="col">Origen</th>
+            <th scope="col">Registrado</th>
+            <th scope="col">Firma</th>
+            <th scope="col" class="text-end">Acciones</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (doc of visibles(); track doc.origen + '-' + doc.id) {
+            <tr>
+              <td class="tabular fw-semibold">{{ doc.folio ?? '—' }}</td>
+              <td>
+                <span class="d-block text-truncate" style="max-width: 24rem">
+                  {{ doc.nombre ?? 'Sin nombre' }}
+                </span>
+                @if (doc.uuid) {
+                  <code class="text-muted-2" style="font-size: 0.7rem">{{ doc.uuid }}</code>
+                }
+              </td>
+              <td>
+                <span class="badge text-bg-light border">
+                  {{ doc.origen === 'oficio' ? 'Oficio' : 'Documento' }}
+                </span>
+              </td>
+              <td class="tabular">{{ doc.created_at | date: 'dd/MM/yyyy' }}</td>
+              <td>
+                @if (doc.firmado) {
+                  <span class="badge badge-estado text-success-emphasis bg-success-subtle">
+                    <i class="bi bi-patch-check-fill" aria-hidden="true"></i> Firmado
+                  </span>
+                } @else if (!doc.firmable) {
+                  <span class="badge badge-estado text-secondary-emphasis bg-secondary-subtle">
+                    <i class="bi bi-file-earmark-x" aria-hidden="true"></i> Sin archivo
+                  </span>
+                } @else {
+                  <span class="badge badge-estado text-warning-emphasis bg-warning-subtle">
+                    <i class="bi bi-hourglass-split" aria-hidden="true"></i> Por firmar
+                  </span>
+                }
+              </td>
+              <td class="text-end">
+                @if (!doc.firmado && doc.firmable) {
+                  <button type="button" class="btn btn-sm btn-primary" (click)="abrirDialogo(doc)">
+                    <i class="bi bi-vector-pen me-1" aria-hidden="true"></i>Firmar
+                  </button>
+                } @else if (!doc.firmable) {
+                  <span class="text-muted-2 small">No firmable</span>
+                } @else {
+                  <span class="text-success small">
+                    <i class="bi bi-check2" aria-hidden="true"></i> Listo
+                  </span>
+                }
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  }
+</section>
+
+<!-- Diálogo de contraseña de la FIEL -->
+@if (seleccionado(); as doc) {
+  <div class="modal d-block" tabindex="-1" role="dialog">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h2 class="modal-title h6 mb-0">Firmar documento</h2>
+          <button
+            type="button"
+            class="btn-close"
+            aria-label="Cerrar"
+            [disabled]="firmando()"
+            (click)="cerrarDialogo()"
+          ></button>
+        </div>
+
+        <div class="modal-body">
+          <p class="small mb-1 text-muted-2">Documento</p>
+          <p class="fw-semibold mb-3">{{ doc.nombre }}</p>
+
+          <label for="psw" class="form-label">Contraseña de tu firma electrónica</label>
+          <div class="input-group">
+            <span class="input-group-text">
+              <i class="bi bi-shield-lock" aria-hidden="true"></i>
+            </span>
+            <input
+              id="psw"
+              [type]="mostrarPassword() ? 'text' : 'password'"
+              class="form-control"
+              autocomplete="off"
+              [ngModel]="password()"
+              (ngModelChange)="password.set($event)"
+              (keyup.enter)="confirmarFirma()"
+            />
+            <button
+              type="button"
+              class="btn btn-outline-secondary"
+              [attr.aria-label]="mostrarPassword() ? 'Ocultar contraseña' : 'Mostrar contraseña'"
+              (click)="mostrarPassword.set(!mostrarPassword())"
+            >
+              <i class="bi" [class]="mostrarPassword() ? 'bi-eye-slash' : 'bi-eye'"></i>
+            </button>
+          </div>
+
+          <div class="alert alert-warning small mt-3 mb-0 d-flex gap-2">
+            <i class="bi bi-exclamation-triangle-fill" aria-hidden="true"></i>
+            <span>
+              La firma es <strong>definitiva</strong>. Tras tres intentos fallidos tu
+              cuenta se bloquea.
+            </span>
+          </div>
+        </div>
+
+        <div class="modal-footer">
+          <button
+            type="button"
+            class="btn btn-outline-secondary"
+            [disabled]="firmando()"
+            (click)="cerrarDialogo()"
+          >
+            Cancelar
+          </button>
+          <button
+            type="button"
+            class="btn btn-primary"
+            [disabled]="firmando() || !password()"
+            (click)="confirmarFirma()"
+          >
+            @if (firmando()) {
+              <span class="spinner-border spinner-border-sm me-2" aria-hidden="true"></span>
+              Firmando…
+            } @else {
+              <i class="bi bi-vector-pen me-1" aria-hidden="true"></i>Firmar
+            }
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="modal-backdrop show"></div>
+}

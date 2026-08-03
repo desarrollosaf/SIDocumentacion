@@ -1,0 +1,46 @@
+.sid-shell {
+  min-height: 100vh;
+
+  &__main {
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+    // Deja espacio para el sidebar fijo; en móvil ocupa todo el ancho.
+    margin-inline-start: var(--sid-sidebar-width);
+    transition: margin-inline-start 0.2s ease;
+  }
+
+  &.is-collapsed &__main {
+    margin-inline-start: var(--sid-sidebar-width-collapsed);
+  }
+
+  &__content {
+    flex: 1;
+    min-width: 0;
+  }
+
+  &__footer {
+    display: flex;
+    justify-content: space-between;
+    gap: 1rem;
+    padding: 0.85rem 1.5rem;
+    border-top: 1px solid var(--sid-border);
+    background: var(--sid-surface);
+    font-size: 0.78rem;
+    color: var(--sid-muted);
+  }
+
+  &__backdrop {
+    position: fixed;
+    inset: 0;
+    z-index: 1035;
+    background: rgb(11 18 32 / 0.5);
+  }
+}
+
+@media (max-width: 991.98px) {
+  .sid-shell__main,
+  .sid-shell.is-collapsed .sid-shell__main {
+    margin-inline-start: 0;
+  }
+}

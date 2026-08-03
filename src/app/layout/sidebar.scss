@@ -1,0 +1,276 @@
+:host {
+  display: contents;
+}
+
+.sid-sidebar {
+  position: fixed;
+  inset-block: 0;
+  inset-inline-start: 0;
+  z-index: 1040;
+  width: var(--sid-sidebar-width);
+  display: flex;
+  flex-direction: column;
+  background: var(--sid-sidebar-bg);
+  color: var(--sid-sidebar-fg);
+  border-inline-end: 1px solid var(--sid-sidebar-border);
+  transition:
+    width 0.2s ease,
+    transform 0.25s ease;
+}
+
+// --- Identidad -------------------------------------------------------------
+.sid-brand {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  height: var(--sid-topbar-height);
+  padding-inline: 1.15rem;
+  border-bottom: 1px solid var(--sid-sidebar-border);
+  flex-shrink: 0;
+  overflow: hidden;
+
+  &__mark {
+    display: grid;
+    place-items: center;
+    flex-shrink: 0;
+    width: 2.25rem;
+    height: 2.25rem;
+    border-radius: 0.5rem;
+    background: var(--sid-primary);
+    color: #fff;
+    font-size: 1.15rem;
+  }
+
+  &__text {
+    display: flex;
+    flex-direction: column;
+    line-height: 1.2;
+    white-space: nowrap;
+
+    strong {
+      color: var(--sid-primary);
+      font-size: 0.975rem;
+      letter-spacing: 0.01em;
+    }
+
+    small {
+      font-size: 0.7rem;
+      color: var(--sid-muted);
+      overflow: hidden;
+      text-overflow: ellipsis;
+      max-width: 11rem;
+    }
+  }
+}
+
+// --- Tarjeta del usuario ---------------------------------------------------
+.sid-usuario {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  padding: 0.85rem 1.15rem;
+  border-bottom: 1px solid var(--sid-sidebar-border);
+  overflow: hidden;
+
+  &__avatar {
+    display: grid;
+    place-items: center;
+    flex-shrink: 0;
+    width: 2.1rem;
+    height: 2.1rem;
+    border-radius: 50%;
+    background: var(--sid-primary-soft);
+    color: var(--sid-primary);
+    font-size: 0.78rem;
+    font-weight: 700;
+  }
+
+  &__datos {
+    min-width: 0;
+    line-height: 1.25;
+
+    strong {
+      display: block;
+      font-size: 0.8rem;
+      color: #2b3138;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    span {
+      display: block;
+      font-size: 0.7rem;
+      color: var(--sid-muted);
+    }
+  }
+}
+
+// --- Navegación ------------------------------------------------------------
+.sid-nav {
+  flex: 1;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding: 0.75rem 0.65rem 1.5rem;
+
+  scrollbar-width: thin;
+  scrollbar-color: #cfd6e0 transparent;
+
+  &__header {
+    margin: 1rem 0 0.4rem;
+    padding-inline: 0.6rem;
+    font-size: 0.66rem;
+    font-weight: 700;
+    letter-spacing: 0.09em;
+    text-transform: uppercase;
+    color: var(--sid-muted);
+    white-space: nowrap;
+  }
+
+  &__empty {
+    padding: 0.6rem;
+    font-size: 0.8rem;
+    color: var(--sid-muted);
+  }
+
+  &__link {
+    display: flex;
+    align-items: center;
+    gap: 0.7rem;
+    width: 100%;
+    padding: 0.55rem 0.6rem;
+    margin-bottom: 0.15rem;
+    border: 0;
+    border-radius: 0.5rem;
+    background: transparent;
+    color: inherit;
+    font-size: 0.875rem;
+    text-align: start;
+    text-decoration: none;
+    transition:
+      background-color 0.15s ease,
+      color 0.15s ease;
+
+    &:hover,
+    &:focus-visible {
+      background: var(--sid-sidebar-bg-hover);
+      color: var(--sid-sidebar-fg-active);
+    }
+
+    // El elemento activo se marca con guinda y una barra a la izquierda.
+    &.is-active {
+      background: var(--sid-primary-soft);
+      color: var(--sid-sidebar-fg-active);
+      font-weight: 600;
+      box-shadow: inset 3px 0 0 var(--sid-sidebar-accent);
+    }
+  }
+
+  &__icon {
+    flex-shrink: 0;
+    width: 1.25rem;
+    font-size: 1.05rem;
+    text-align: center;
+  }
+
+  &__label {
+    flex: 1;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  &__chevron {
+    font-size: 0.7rem;
+    transition: transform 0.2s ease;
+  }
+
+  &__link--group.is-expanded .sid-nav__chevron {
+    transform: rotate(180deg);
+  }
+
+  &__submenu {
+    margin: 0.1rem 0 0.4rem 1.15rem;
+    padding-inline-start: 0.5rem;
+    border-inline-start: 1px solid var(--sid-sidebar-border);
+  }
+
+  &__link--child {
+    font-size: 0.83rem;
+    padding-block: 0.45rem;
+  }
+}
+
+.sid-sidebar__footer {
+  padding: 0.85rem 1.15rem;
+  border-top: 1px solid var(--sid-sidebar-border);
+  font-size: 0.7rem;
+  color: var(--sid-muted);
+  white-space: nowrap;
+  overflow: hidden;
+}
+
+// --- Estado contraído (solo iconos) ---------------------------------------
+.sid-sidebar.is-collapsed {
+  width: var(--sid-sidebar-width-collapsed);
+
+  .sid-brand__text,
+  .sid-nav__label,
+  .sid-nav__chevron,
+  .sid-nav__header,
+  .sid-usuario__datos,
+  .sid-sidebar__footer {
+    display: none;
+  }
+
+  .sid-brand,
+  .sid-usuario {
+    justify-content: center;
+    padding-inline: 0;
+  }
+
+  .sid-nav__link {
+    justify-content: center;
+    padding-inline: 0;
+  }
+
+  .sid-nav__submenu {
+    margin-inline-start: 0;
+    padding-inline-start: 0;
+    border-inline-start: 0;
+  }
+}
+
+// --- Comportamiento móvil --------------------------------------------------
+@media (max-width: 991.98px) {
+  .sid-sidebar {
+    width: var(--sid-sidebar-width);
+    transform: translateX(-100%);
+    box-shadow: var(--sid-shadow-lg);
+
+    &.is-open {
+      transform: translateX(0);
+    }
+
+    // En móvil el panel siempre se muestra completo, nunca contraído.
+    &.is-collapsed {
+      width: var(--sid-sidebar-width);
+
+      .sid-brand__text,
+      .sid-nav__label,
+      .sid-nav__chevron,
+      .sid-nav__header,
+      .sid-usuario__datos,
+      .sid-sidebar__footer {
+        display: revert;
+      }
+
+      .sid-brand,
+      .sid-usuario,
+      .sid-nav__link {
+        justify-content: flex-start;
+        padding-inline: 0.6rem;
+      }
+    }
+  }
+}

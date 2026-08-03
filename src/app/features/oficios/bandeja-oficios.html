@@ -1,0 +1,148 @@
+<sid-page-header
+  [titulo]="esEntrada ? 'Bandeja de entrada' : 'Bandeja de salida'"
+  [descripcion]="
+    esEntrada
+      ? 'Oficios dirigidos a tu persona para atención o conocimiento.'
+      : 'Oficios que has registrado y enviado a otras áreas.'
+  "
+  [migas]="[{ etiqueta: 'Oficios' }, { etiqueta: esEntrada ? 'Entrada' : 'Salida' }]"
+>
+  <a routerLink="/oficios/carga" class="btn btn-primary">
+    <i class="bi bi-cloud-arrow-up me-1" aria-hidden="true"></i>
+    Cargar documento
+  </a>
+</sid-page-header>
+
+<section class="sid-card">
+  <!-- Filtros -->
+  <div class="d-flex flex-wrap align-items-center gap-2 p-3 border-bottom">
+    @if (esEntrada) {
+      <div class="btn-group btn-group-sm" role="group" aria-label="Filtrar por estado">
+        <button
+          type="button"
+          class="btn"
+          [class]="filtro().estado === 'pendientes' ? 'btn-primary' : 'btn-outline-secondary'"
+          (click)="cambiarEstado('pendientes')"
+        >
+          Pendientes
+        </button>
+        <button
+          type="button"
+          class="btn"
+          [class]="filtro().estado === 'atendidos' ? 'btn-primary' : 'btn-outline-secondary'"
+          (click)="cambiarEstado('atendidos')"
+        >
+          Atendidos
+        </button>
+        <button
+          type="button"
+          class="btn"
+          [class]="filtro().estado === 'todos' ? 'btn-primary' : 'btn-outline-secondary'"
+          (click)="cambiarEstado('todos')"
+        >
+          Todos
+        </button>
+      </div>
+    }
+
+    <div class="input-group input-group-sm ms-auto" style="max-width: 20rem">
+      <span class="input-group-text">
+        <i class="bi bi-search" aria-hidden="true"></i>
+      </span>
+      <input
+        type="search"
+        class="form-control"
+        placeholder="Buscar por folio o asunto"
+        aria-label="Buscar oficios"
+        [ngModel]="filtro().search"
+        (keyup.enter)="buscar(entradaBusqueda.value)"
+        #entradaBusqueda
+      />
+      <button type="button" class="btn btn-outline-secondary" (click)="buscar(entradaBusqueda.value)">
+        Buscar
+      </button>
+    </div>
+
+    <button type="button" class="btn btn-sm btn-outline-secondary" (click)="limpiarFiltros()">
+      <i class="bi bi-arrow-counterclockwise" aria-hidden="true"></i>
+      <span class="visually-hidden">Limpiar filtros</span>
+    </button>
+  </div>
+
+  @if (cargando()) {
+    <sid-cargando mensaje="Consultando bandeja…" />
+  } @else if (!pagina()?.data?.length) {
+    <sid-empty-state
+      titulo="No hay oficios que mostrar"
+      descripcion="Ajusta los filtros o vuelve más tarde."
+      icono="bi-inbox"
+    />
+  } @else {
+    <div class="sid-table-wrap">
+      <table class="table table-hover align-middle mb-0">
+        <thead>
+          <tr>
+            <th scope="col">Folio</th>
+            <th scope="col">Asunto</th>
+            <th scope="col">{{ esEntrada ? 'Remitente' : 'Destinatarios' }}</th>
+            <th scope="col">Fecha</th>
+            <th scope="col">Estado</th>
+            <th scope="col" class="text-end">Acciones</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (oficio of pagina()!.data; track oficio.atencion_id ?? oficio.id) {
+            <tr>
+              <td class="tabular fw-semibold">{{ oficio.folio ?? '—' }}</td>
+              <td>
+                <span class="d-block text-truncate" style="max-width: 22rem">
+                  {{ oficio.titulo_doc }}
+                </span>
+                @if (oficio.firmado) {
+                  <span class="badge text-bg-light border mt-1">
+                    <i class="bi bi-vector-pen me-1" aria-hidden="true"></i>Firmado
+                  </span>
+                }
+              </td>
+              <td class="text-truncate" style="max-width: 18rem">{{ oficio.contraparte }}</td>
+              <td class="tabular">{{ oficio.created_at | date: 'dd/MM/yyyy' }}</td>
+              <td>
+                <sid-estado-badge [atendido]="oficio.atendido" [visto]="oficio.visto" />
+              </td>
+              <td class="text-end text-nowrap">
+                <a
+                  [routerLink]="['/oficios', oficio.id]"
+                  class="btn btn-sm btn-outline-primary btn-icon"
+                  title="Ver detalle"
+                >
+                  <i class="bi bi-eye" aria-hidden="true"></i>
+                  <span class="visually-hidden">Ver detalle del oficio {{ oficio.folio }}</span>
+                </a>
+
+                @if (esEntrada && !oficio.atendido) {
+                  <button
+                    type="button"
+                    class="btn btn-sm btn-outline-success btn-icon ms-1"
+                    title="Marcar como atendido"
+                    (click)="atender(oficio)"
+                  >
+                    <i class="bi bi-check2" aria-hidden="true"></i>
+                    <span class="visually-hidden">Marcar como atendido</span>
+                  </button>
+                }
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+
+    <sid-paginador
+      [pagina]="pagina()!.page"
+      [totalPaginas]="pagina()!.lastPage"
+      [total]="pagina()!.total"
+      [porPagina]="pagina()!.perPage"
+      (cambio)="cambiarPagina($event)"
+    />
+  }
+</section>

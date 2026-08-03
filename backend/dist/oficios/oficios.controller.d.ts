@@ -1,0 +1,97 @@
+import type { AuthenticatedUser } from '../common/interfaces/authenticated-user.interface';
+import { CrearOficioDto } from './dto/crear-oficio.dto';
+import { FiltroBandejaDto } from './dto/filtro-bandeja.dto';
+import { OficiosService } from './oficios.service';
+export declare class OficiosController {
+    private readonly oficios;
+    constructor(oficios: OficiosService);
+    resumen(user: AuthenticatedUser): Promise<{
+        entradaPendientes: number;
+        entradaSinVer: number;
+        salidaTotal: number;
+    }>;
+    entrada(user: AuthenticatedUser, filtro: FiltroBandejaDto): Promise<import("../common/dto/pagination.dto").Paginated<import("./oficios.service").OficioBandeja>>;
+    salida(user: AuthenticatedUser, filtro: FiltroBandejaDto): Promise<import("../common/dto/pagination.dto").Paginated<import("./oficios.service").OficioBandeja>>;
+    detalle(id: number): Promise<{
+        remitente: string;
+        destinatarios: {
+            nombre: string;
+            turnado_por: string | null;
+            id: number;
+            id_registro_doc: number;
+            rfc_atencion: string;
+            visto: number;
+            fecha_visto: Date | null;
+            status_atencion: number;
+            fecha_atencion: Date | null;
+            tipo_atencion: string;
+            rfc_turna: string | null;
+            activo: number;
+            created_at: Date | null;
+            updated_at: Date | null;
+            registroDoc?: import("../entities/doc/registro-doc.entity").RegistroDoc | null;
+        }[];
+        id: number;
+        folio: string | null;
+        fojas: number | null;
+        titulo_doc: string | null;
+        path_doc: string | null;
+        uuid_doc: string | null;
+        path_acuse: string | null;
+        uuid_acuse: string | null;
+        rfc_registro: string | null;
+        serie_id: number | null;
+        subserie_id: number | null;
+        expediente_id: number | null;
+        tipo_doc: number | null;
+        firmado: number | null;
+        status: number;
+        activo: number;
+        created_at: Date | null;
+        updated_at: Date | null;
+    }>;
+    crear(user: AuthenticatedUser, dto: CrearOficioDto): Promise<{
+        remitente: string;
+        destinatarios: {
+            nombre: string;
+            turnado_por: string | null;
+            id: number;
+            id_registro_doc: number;
+            rfc_atencion: string;
+            visto: number;
+            fecha_visto: Date | null;
+            status_atencion: number;
+            fecha_atencion: Date | null;
+            tipo_atencion: string;
+            rfc_turna: string | null;
+            activo: number;
+            created_at: Date | null;
+            updated_at: Date | null;
+            registroDoc?: import("../entities/doc/registro-doc.entity").RegistroDoc | null;
+        }[];
+        id: number;
+        folio: string | null;
+        fojas: number | null;
+        titulo_doc: string | null;
+        path_doc: string | null;
+        uuid_doc: string | null;
+        path_acuse: string | null;
+        uuid_acuse: string | null;
+        rfc_registro: string | null;
+        serie_id: number | null;
+        subserie_id: number | null;
+        expediente_id: number | null;
+        tipo_doc: number | null;
+        firmado: number | null;
+        status: number;
+        activo: number;
+        created_at: Date | null;
+        updated_at: Date | null;
+    }>;
+    marcarVisto(user: AuthenticatedUser, id: number): Promise<{
+        message: string;
+    }>;
+    atender(user: AuthenticatedUser, id: number): Promise<{
+        message: string;
+    }>;
+}

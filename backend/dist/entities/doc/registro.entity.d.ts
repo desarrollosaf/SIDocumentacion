@@ -1,0 +1,41 @@
+import { Serie } from './serie.entity';
+import { RegistroAtencion } from './registro-atencion.entity';
+export declare const ESTADO_ENVIO: {
+    readonly PREREGISTRO: 0;
+    readonly VOBO: 2;
+    readonly LIBERADO: 4;
+};
+export declare class Registro {
+    id: number;
+    folio: string;
+    folio_rastreo: number | null;
+    fecha_recepcion: string | null;
+    fecha_documento: string | null;
+    referencia_documento: string | null;
+    fecha_limite_atencion: string;
+    hora_atencion: string | null;
+    tipo_atencion: number;
+    serie_id: number;
+    subserie_id: number | null;
+    expediente_id: number | null;
+    titulo_doc: string;
+    descripcion_doc: string;
+    path: string | null;
+    user_registro: number;
+    remitente_rfc: string;
+    otro_remitente: string | null;
+    nombre_remitente: string | null;
+    fojas: number | null;
+    uuid: string | null;
+    firmado: number | null;
+    tipo_doc: number | null;
+    status_envio: number | null;
+    rfc_autorizado: string | null;
+    rfc_vobo: string | null;
+    status: number;
+    activo: number;
+    created_at: Date | null;
+    updated_at: Date | null;
+    serie?: Serie | null;
+    atenciones?: RegistroAtencion[];
+}

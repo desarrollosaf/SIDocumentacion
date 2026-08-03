@@ -1,0 +1,123 @@
+import { Repository } from 'typeorm';
+import { Paginated } from '../common/dto/pagination.dto';
+import type { AuthenticatedUser } from '../common/interfaces/authenticated-user.interface';
+import { AtencionDoc } from '../entities/doc/atencion-doc.entity';
+import { RegistroDoc } from '../entities/doc/registro-doc.entity';
+import { ServidorPublico } from '../entities/saf/servidor-publico.entity';
+import { CrearOficioDto } from './dto/crear-oficio.dto';
+import { FiltroBandejaDto } from './dto/filtro-bandeja.dto';
+export interface OficioBandeja {
+    id: number;
+    atencion_id: number | null;
+    folio: string | null;
+    titulo_doc: string | null;
+    fojas: number | null;
+    firmado: boolean;
+    tipo_atencion: string | null;
+    visto: boolean;
+    atendido: boolean;
+    fecha_visto: Date | null;
+    fecha_atencion: Date | null;
+    created_at: Date | null;
+    contraparte: string;
+}
+export declare class OficiosService {
+    private readonly registros;
+    private readonly atenciones;
+    private readonly servidores;
+    constructor(registros: Repository<RegistroDoc>, atenciones: Repository<AtencionDoc>, servidores: Repository<ServidorPublico>);
+    bandejaEntrada(user: AuthenticatedUser, filtro: FiltroBandejaDto): Promise<Paginated<OficioBandeja>>;
+    bandejaSalida(user: AuthenticatedUser, filtro: FiltroBandejaDto): Promise<Paginated<OficioBandeja>>;
+    detalle(id: number): Promise<{
+        remitente: string;
+        destinatarios: {
+            nombre: string;
+            turnado_por: string | null;
+            id: number;
+            id_registro_doc: number;
+            rfc_atencion: string;
+            visto: number;
+            fecha_visto: Date | null;
+            status_atencion: number;
+            fecha_atencion: Date | null;
+            tipo_atencion: string;
+            rfc_turna: string | null;
+            activo: number;
+            created_at: Date | null;
+            updated_at: Date | null;
+            registroDoc?: RegistroDoc | null;
+        }[];
+        id: number;
+        folio: string | null;
+        fojas: number | null;
+        titulo_doc: string | null;
+        path_doc: string | null;
+        uuid_doc: string | null;
+        path_acuse: string | null;
+        uuid_acuse: string | null;
+        rfc_registro: string | null;
+        serie_id: number | null;
+        subserie_id: number | null;
+        expediente_id: number | null;
+        tipo_doc: number | null;
+        firmado: number | null;
+        status: number;
+        activo: number;
+        created_at: Date | null;
+        updated_at: Date | null;
+    }>;
+    crear(user: AuthenticatedUser, dto: CrearOficioDto): Promise<{
+        remitente: string;
+        destinatarios: {
+            nombre: string;
+            turnado_por: string | null;
+            id: number;
+            id_registro_doc: number;
+            rfc_atencion: string;
+            visto: number;
+            fecha_visto: Date | null;
+            status_atencion: number;
+            fecha_atencion: Date | null;
+            tipo_atencion: string;
+            rfc_turna: string | null;
+            activo: number;
+            created_at: Date | null;
+            updated_at: Date | null;
+            registroDoc?: RegistroDoc | null;
+        }[];
+        id: number;
+        folio: string | null;
+        fojas: number | null;
+        titulo_doc: string | null;
+        path_doc: string | null;
+        uuid_doc: string | null;
+        path_acuse: string | null;
+        uuid_acuse: string | null;
+        rfc_registro: string | null;
+        serie_id: number | null;
+        subserie_id: number | null;
+        expediente_id: number | null;
+        tipo_doc: number | null;
+        firmado: number | null;
+        status: number;
+        activo: number;
+        created_at: Date | null;
+        updated_at: Date | null;
+    }>;
+    marcarVisto(user: AuthenticatedUser, atencionId: number): Promise<{
+        message: string;
+    }>;
+    atender(user: AuthenticatedUser, atencionId: number): Promise<{
+        message: string;
+    }>;
+    resumen(user: AuthenticatedUser): Promise<{
+        entradaPendientes: number;
+        entradaSinVer: number;
+        salidaTotal: number;
+    }>;
+    private atencionPropia;
+    private siguienteFolio;
+    private nombresPorRfc;
+    private aplicarEstado;
+    private aplicarFiltrosComunes;
+}

@@ -1,0 +1,104 @@
+<sid-page-header
+  titulo="Folios"
+  descripcion="Consulta los folios generados por tus registros."
+  [migas]="[{ etiqueta: 'Documentación' }, { etiqueta: 'Folios' }]"
+/>
+
+<section class="sid-card">
+  <div class="row g-2 align-items-end p-3 border-bottom">
+    <div class="col-12 col-md-3">
+      <label for="desde" class="form-label small mb-1">Desde</label>
+      <input id="desde" type="date" class="form-control form-control-sm" #campoDesde />
+    </div>
+
+    <div class="col-12 col-md-3">
+      <label for="hasta" class="form-label small mb-1">Hasta</label>
+      <input id="hasta" type="date" class="form-control form-control-sm" #campoHasta />
+    </div>
+
+    <div class="col-12 col-md-2">
+      <button
+        type="button"
+        class="btn btn-sm btn-outline-primary w-100"
+        (click)="filtrarPorFechas(campoDesde.value, campoHasta.value)"
+      >
+        Filtrar
+      </button>
+    </div>
+
+    <div class="col-12 col-md-4">
+      <label for="buscarFolio" class="form-label small mb-1">Búsqueda</label>
+      <div class="input-group input-group-sm">
+        <input
+          id="buscarFolio"
+          type="search"
+          class="form-control"
+          placeholder="Folio o asunto"
+          [ngModel]="filtro().search"
+          (keyup.enter)="buscar(campoBusqueda.value)"
+          #campoBusqueda
+        />
+        <button type="button" class="btn btn-outline-secondary" (click)="buscar(campoBusqueda.value)">
+          <i class="bi bi-search" aria-hidden="true"></i>
+          <span class="visually-hidden">Buscar</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  @if (cargando()) {
+    <sid-cargando mensaje="Consultando folios…" />
+  } @else if (!pagina()?.data?.length) {
+    <sid-empty-state
+      titulo="Sin folios registrados"
+      descripcion="No se encontraron folios con los criterios indicados."
+      icono="bi-hash"
+    />
+  } @else {
+    <div class="sid-table-wrap">
+      <table class="table table-hover align-middle mb-0">
+        <thead>
+          <tr>
+            <th scope="col">Folio</th>
+            <th scope="col">Asunto</th>
+            <th scope="col">Recepción</th>
+            <th scope="col">Fecha límite</th>
+            <th scope="col" class="text-end">Detalle</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (folio of pagina()!.data; track folio.id) {
+            <tr>
+              <td class="tabular fw-semibold">{{ folio.folio ?? '—' }}</td>
+              <td>
+                <span class="d-block text-truncate" style="max-width: 26rem">
+                  {{ folio.titulo_doc }}
+                </span>
+              </td>
+              <td class="tabular">{{ folio.fecha_recepcion | date: 'dd/MM/yyyy' }}</td>
+              <td class="tabular">{{ folio.fecha_limite_atencion | date: 'dd/MM/yyyy' }}</td>
+              <td class="text-end">
+                <a
+                  [routerLink]="['/solicitudes', folio.id]"
+                  class="btn btn-sm btn-outline-primary btn-icon"
+                  title="Ver detalle"
+                >
+                  <i class="bi bi-eye" aria-hidden="true"></i>
+                  <span class="visually-hidden">Ver folio {{ folio.folio }}</span>
+                </a>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+
+    <sid-paginador
+      [pagina]="pagina()!.page"
+      [totalPaginas]="pagina()!.lastPage"
+      [total]="pagina()!.total"
+      [porPagina]="pagina()!.perPage"
+      (cambio)="cambiarPagina($event)"
+    />
+  }
+</section>
