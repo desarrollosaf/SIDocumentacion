@@ -5,7 +5,7 @@ FROM node:24-alpine AS build
 
 WORKDIR /app
 
-ARG BASE_HREF=/sidocumentacion/
+ARG BASE_HREF=/sigaplem/
 
 COPY package.json package-lock.json ./
 
