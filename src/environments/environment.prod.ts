@@ -1,6 +1,6 @@
 export const environment = {
   production: true,
-  apiUrl: '/api',
+  apiUrl: '/sigaplem/backend/api',
   appName: 'SIDocumentación',
   institucion: 'Secretaría de Administración y Finanzas',
 };
