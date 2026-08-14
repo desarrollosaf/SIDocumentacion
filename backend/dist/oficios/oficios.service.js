@@ -647,10 +647,10 @@ let OficiosService = class OficiosService {
         });
         if (registro?.rfc_registro != user.rfc) {
             const destinatario = registro?.destinatarios?.find((d) => d.rfc_atencion === user.rfc);
-            console.log('destinatatios', destinatario);
             if (destinatario) {
                 const at = destinatario.tipo_atencion.split(',');
-                at.forEach(element => {
+                let firma;
+                for (const element of at) {
                     const datos = {
                         path: registro?.path_acuse,
                         user_rfc: user.rfc,
@@ -664,10 +664,27 @@ let OficiosService = class OficiosService {
                         fecha_expedicion: new Date,
                         fecha_certificacion: new Date
                     };
-                    console.log('datos ', datos);
-                });
-                return true;
+                    firma = await this.firmarAcuse(datos);
+                }
+                if (firma === 1) {
+                    this.atenciones.update({ id: destinatario.id }, { visto: 1, fecha_visto: new Date() });
+                }
+                return 1;
             }
+        }
+    }
+    async firmarAcuse(datos) {
+        const feplemUrl = this.configService.get('feplem.baseUrl');
+        try {
+            const response = await (0, rxjs_1.firstValueFrom)(this.http.post(feplemUrl + '/api/firmaDocumentos', datos, {
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+            }));
+            return response.data;
+        }
+        catch (error) {
+            return error.response?.data;
         }
     }
 };

@@ -54,7 +54,7 @@ export declare class OficiosController {
     validarPsw(user: AuthenticatedUser, psw: string): Promise<any>;
     validarFirmado(user: AuthenticatedUser, id: number): Promise<boolean>;
     verPdf(id: number, tipo: number, res: Response): Promise<void>;
-    firmarDoc(id: number, psw: string, user: AuthenticatedUser): Promise<true | undefined>;
+    firmarDoc(id: number, psw: string, user: AuthenticatedUser): Promise<1 | undefined>;
     crear(file: Express.Multer.File, user: AuthenticatedUser, dto: CrearOficioDto): Promise<{
         remitente: string;
         destinatarios: {
