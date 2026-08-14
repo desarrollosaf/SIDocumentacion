@@ -137,7 +137,7 @@ export class FirmaService {
       );
     }
 
-    await this.oficios.update(oficio.id, { firmado: 1 });
+    await this.oficios.update(oficio.id, { firmado: true });
 
     return { message: `El oficio ${oficio.folio ?? ''} quedó firmado.`.trim(), hash };
   }

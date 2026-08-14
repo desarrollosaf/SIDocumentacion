@@ -26,6 +26,7 @@ const departamento_entity_1 = require("../entities/saf/departamento.entity");
 const dependencia_entity_1 = require("../entities/saf/dependencia.entity");
 const direccion_entity_1 = require("../entities/saf/direccion.entity");
 const servidor_publico_entity_1 = require("../entities/saf/servidor-publico.entity");
+const tipo_apoyo_entity_1 = require("../entities/doc/tipo-apoyo.entity");
 let CatalogosService = class CatalogosService {
     secciones;
     series;
@@ -33,17 +34,19 @@ let CatalogosService = class CatalogosService {
     subfondos;
     tiposDoc;
     tiposAtencion;
+    tiposApoyo;
     servidores;
     dependencias;
     direcciones;
     departamentos;
-    constructor(secciones, series, subseries, subfondos, tiposDoc, tiposAtencion, servidores, dependencias, direcciones, departamentos) {
+    constructor(secciones, series, subseries, subfondos, tiposDoc, tiposAtencion, tiposApoyo, servidores, dependencias, direcciones, departamentos) {
         this.secciones = secciones;
         this.series = series;
         this.subseries = subseries;
         this.subfondos = subfondos;
         this.tiposDoc = tiposDoc;
         this.tiposAtencion = tiposAtencion;
+        this.tiposApoyo = tiposApoyo;
         this.servidores = servidores;
         this.dependencias = dependencias;
         this.direcciones = direcciones;
@@ -160,6 +163,20 @@ let CatalogosService = class CatalogosService {
             nombre: codigo ? `${codigo} — ${nombre ?? ''}` : (nombre ?? ''),
         };
     }
+    async tipoApoyo() {
+        const filas = await this.tiposApoyo.find({
+            relations: { docsApoyo: true },
+        });
+        const result = filas.map((t) => ({
+            id: t.id,
+            tipo: t.tipo ?? '',
+            docsApoyo: (t.docsApoyo ?? []).map((d) => ({
+                id: d.id,
+                tipo: d.tipo ?? '',
+            })),
+        }));
+        return result;
+    }
 };
 exports.CatalogosService = CatalogosService;
 exports.CatalogosService = CatalogosService = __decorate([
@@ -170,11 +187,13 @@ exports.CatalogosService = CatalogosService = __decorate([
     __param(3, (0, typeorm_1.InjectRepository)(subfondo_entity_1.Subfondo)),
     __param(4, (0, typeorm_1.InjectRepository)(catalogos_entity_1.TipoDoc)),
     __param(5, (0, typeorm_1.InjectRepository)(catalogos_entity_1.TipoAtencion)),
-    __param(6, (0, typeorm_1.InjectRepository)(servidor_publico_entity_1.ServidorPublico, configuration_1.SAF_CONNECTION)),
-    __param(7, (0, typeorm_1.InjectRepository)(dependencia_entity_1.Dependencia, configuration_1.SAF_CONNECTION)),
-    __param(8, (0, typeorm_1.InjectRepository)(direccion_entity_1.Direccion, configuration_1.SAF_CONNECTION)),
-    __param(9, (0, typeorm_1.InjectRepository)(departamento_entity_1.Departamento, configuration_1.SAF_CONNECTION)),
+    __param(6, (0, typeorm_1.InjectRepository)(tipo_apoyo_entity_1.TipoApoyo)),
+    __param(7, (0, typeorm_1.InjectRepository)(servidor_publico_entity_1.ServidorPublico, configuration_1.SAF_CONNECTION)),
+    __param(8, (0, typeorm_1.InjectRepository)(dependencia_entity_1.Dependencia, configuration_1.SAF_CONNECTION)),
+    __param(9, (0, typeorm_1.InjectRepository)(direccion_entity_1.Direccion, configuration_1.SAF_CONNECTION)),
+    __param(10, (0, typeorm_1.InjectRepository)(departamento_entity_1.Departamento, configuration_1.SAF_CONNECTION)),
     __metadata("design:paramtypes", [typeorm_2.Repository,
+        typeorm_2.Repository,
         typeorm_2.Repository,
         typeorm_2.Repository,
         typeorm_2.Repository,

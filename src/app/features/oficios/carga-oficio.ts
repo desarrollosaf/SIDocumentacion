@@ -4,11 +4,12 @@ import { Router, RouterLink } from '@angular/router';
 import { debounceTime, distinctUntilChanged, switchMap } from 'rxjs';
 import { Subject } from 'rxjs';
 
-import { Opcion, OpcionClasificacion, ServidorPublico } from '../../core/models';
+import { Opcion, OpcionApoyo, OpcionClasificacion, Select, ServidorPublico } from '../../core/models';
 import { CatalogosService } from '../../core/services/catalogos.service';
 import { NotificacionService } from '../../core/services/notificacion.service';
 import { OficiosService } from '../../core/services/oficios.service';
 import { PageHeader } from '../../shared/components/page-header';
+import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 
 interface DestinatarioElegido extends ServidorPublico {
   /** Papel en el flujo de firma: `E` elaboró · `R` revisó · `A` autorizó. */
@@ -31,7 +32,10 @@ export class CargaOficio implements OnInit {
   protected readonly tiposDocumento = signal<Opcion[]>([]);
   protected readonly clasificacion = signal<OpcionClasificacion[]>([]);
   protected readonly subseries = signal<Opcion[]>([]);
-
+  protected readonly tiposApoyo = signal<OpcionApoyo[]>([]);
+  protected readonly tipoApoyoOp = signal<OpcionApoyo[]>([]);
+  protected readonly tipoApoyoVal = signal<Select[]>([]);
+  
   protected readonly resultados = signal<ServidorPublico[]>([]);
   protected readonly destinatarios = signal<DestinatarioElegido[]>([]);
   protected readonly buscando = signal(false);
@@ -39,17 +43,62 @@ export class CargaOficio implements OnInit {
 
   private readonly termino$ = new Subject<string>();
 
+  archivo?: File;
+  archivoUrl?: SafeResourceUrl;
+  archivoSeleccionado?: File;
+  hash?: string;
+  psw?: string;
+
   protected readonly formulario = this.fb.nonNullable.group({
+    folio: [''],
     titulo_doc: ['', [Validators.required, Validators.maxLength(255)]],
     fojas: [1, [Validators.min(1)]],
     tipo_doc: [null as number | null],
     serie_id: [null as number | null],
     subserie_id: [null as number | null],
+    tipo_apoyo: false,
+    tipo_apoyo_id: null as number | null,
+    opcion_id: null as  number | null,
+    firmar_doc: false,
+    psw: [{ value: '', disabled: true }],
+    file_path: ['', [Validators.required]]
   });
+
+  constructor(
+    private sanitizer: DomSanitizer
+  ) {}
+
+  seleccionarArchivo(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    if (!input.files?.length) {
+      return;
+    }
+    this.archivoSeleccionado = input.files[0];
+    const archivo = input.files[0];
+    const url = URL.createObjectURL(archivo);
+    this.formulario.patchValue({
+      file_path: url
+    });
+
+    this.archivoUrl =
+      this.sanitizer.bypassSecurityTrustResourceUrl(url);
+  }
 
   ngOnInit(): void {
     this.catalogos.tiposDocumento().subscribe((tipos) => this.tiposDocumento.set(tipos));
     this.catalogos.miClasificacion().subscribe((series) => this.clasificacion.set(series));
+    this.catalogos.tiposApoyo().subscribe((tiposApoyo) => this.tiposApoyo.set(tiposApoyo));
+    
+    this.formulario.controls.tipo_apoyo.valueChanges.subscribe((tipoApoyo) => {
+      const serie = this.formulario.controls.serie_id;
+      if (tipoApoyo === false) {
+        serie.setValidators([Validators.required]);
+      } else {
+        serie.clearValidators();
+      }
+      serie.updateValueAndValidity();
+  });
+
 
     // El buscador consulta al padrón institucional conforme se escribe.
     this.termino$
@@ -62,6 +111,17 @@ export class CargaOficio implements OnInit {
         this.resultados.set(servidores);
         this.buscando.set(false);
       });
+
+    this.formulario.get('firmar_doc')?.valueChanges.subscribe((firmar: boolean) => {
+      const psw = this.formulario.get('psw');
+
+      if (firmar) {
+        psw?.enable();
+      } else {
+        psw?.disable();
+        psw?.reset(); // 
+      }
+    });
   }
 
   protected buscar(termino: string): void {
@@ -82,6 +142,15 @@ export class CargaOficio implements OnInit {
     const serie = this.clasificacion().find((s) => s.id === id);
     this.subseries.set(serie?.subseries ?? []);
   }
+
+  protected alCambiarApoyo(apoyoId: string): void {
+    const id = apoyoId ? Number(apoyoId) : null;
+    this.formulario.patchValue({ tipo_apoyo_id: id});
+
+    const tipoApoyo = this.tiposApoyo().find((s) => s.id === id);
+    this.tipoApoyoVal.set(tipoApoyo?.docsApoyo ?? []);
+  }
+  
 
   protected agregar(servidor: ServidorPublico): void {
     if (this.destinatarios().some((d) => d.rfc === servidor.rfc)) {
@@ -116,20 +185,30 @@ export class CargaOficio implements OnInit {
 
     const valores = this.formulario.getRawValue();
     this.enviando.set(true);
+  
+    const formData = new FormData();
 
-    this.oficios
-      .crear({
-        titulo_doc: valores.titulo_doc,
-        fojas: valores.fojas ?? undefined,
-        tipo_doc: valores.tipo_doc ?? undefined,
-        serie_id: valores.serie_id ?? undefined,
-        subserie_id: valores.subserie_id ?? undefined,
-        destinatarios: this.destinatarios().map((d) => ({
-          rfc_atencion: d.rfc,
-          tipo_atencion: d.tipo_atencion,
-        })),
-      })
-      .subscribe({
+    if (this.archivoSeleccionado) {
+      formData.append('file', this.archivoSeleccionado);
+    }
+
+    console.log(' hash en formdata ', this.hash)
+    formData.append('folio', valores.folio ?? '');
+    formData.append('titulo_doc', valores.titulo_doc);
+    formData.append('fojas', String(valores.fojas ?? ''));
+    formData.append('tipo_doc', String(valores.tipo_doc ?? ''));
+    formData.append('serie_id', String(valores.serie_id ?? ''));
+    formData.append('subserie_id', String(valores.subserie_id ?? ''));
+    formData.append('tipo_apoyo_id', String(valores.opcion_id ?? ''));
+    formData.append('firmado', String(valores.firmar_doc ?? false));
+    formData.append('hash', String(this.hash ?? ''));
+    formData.append('psw', String(this.psw));
+    formData.append(
+      'destinatarios',
+      JSON.stringify(this.destinatarios())
+    );
+console.log('form ', formData);
+    this.oficios.crear(formData).subscribe({
         next: (oficio) => {
           this.enviando.set(false);
           this.avisos.exito(`Oficio registrado con folio ${oficio.folio}.`);
@@ -138,4 +217,21 @@ export class CargaOficio implements OnInit {
         error: () => this.enviando.set(false),
       });
   }
+
+  validarPsw(){
+    this.psw = this.formulario.get('psw')?.value ?? '';
+    this.oficios.validarPsw(this.psw).subscribe({
+        next: (oficio) => {
+          if(oficio.hash == '0'){
+            this.avisos.advertencia(`La contraseña no es valida o el certificado no esta vigente.`);
+            this.formulario.get('psw')?.reset();
+            return;
+          }else{
+            this.hash = oficio.hash;
+          }
+        },
+        error: () => this.enviando.set(false),
+      });
+  }
+
 }

@@ -9,12 +9,19 @@ import {
   Patch,
   Post,
   Query,
+  Res,
+  UploadedFile,
+  UseInterceptors,
 } from '@nestjs/common';
 import { CurrentUser } from '../common/decorators/current-user.decorator';
 import type { AuthenticatedUser } from '../common/interfaces/authenticated-user.interface';
 import { CrearOficioDto } from './dto/crear-oficio.dto';
 import { FiltroBandejaDto } from './dto/filtro-bandeja.dto';
 import { OficiosService } from './oficios.service';
+import {FileInterceptor } from '@nestjs/platform-express';
+import { NotFoundException } from '@nestjs/common';
+import * as path from 'path';
+import type { Response } from 'express';
 
 @Controller('oficios')
 export class OficiosController {
@@ -40,10 +47,45 @@ export class OficiosController {
     return this.oficios.detalle(id);
   }
 
+  @Get('validarPsw/:psw')
+  validarPsw(@CurrentUser() user: AuthenticatedUser, @Param('psw') psw: string) {
+    return this.oficios.validarPsw(user, psw);
+  }
+
+  @Get('validarFirmado/:id')
+  validarFirmado(@CurrentUser() user: AuthenticatedUser, @Param('id') id: number) {
+    return this.oficios.validarFirmado(user, id);
+  }
+
+  @Get('verPdf/:id/:tipo')
+  async verPdf(
+    @Param('id', ParseIntPipe) id: number,
+    @Param('tipo', ParseIntPipe) tipo: number, 
+    @Res() res: Response){
+     const ruta = await this.oficios.verPdf(id, tipo);
+    return res.sendFile(ruta);
+  }
+
+  @Get('firmarDoc/:id/:psw')
+  async firmarDoc(
+    @Param('id', ParseIntPipe) id: number, 
+    @Param('psw') psw: string, 
+    @CurrentUser() user: AuthenticatedUser){
+      return this.oficios.firmarDocAcuse(id, psw, user);
+    }
+  
+  
   // El sistema original no restringe el registro por rol: basta con la sesión.
   @Post()
-  crear(@CurrentUser() user: AuthenticatedUser, @Body() dto: CrearOficioDto) {
-    return this.oficios.crear(user, dto);
+  @UseInterceptors(FileInterceptor('file'))
+  crear(
+    @UploadedFile() file: Express.Multer.File, 
+    @CurrentUser() user: AuthenticatedUser, 
+    @Body() dto: CrearOficioDto) {
+      if (typeof dto.destinatarios === 'string') {
+        dto.destinatarios = JSON.parse(dto.destinatarios);
+      }
+    return this.oficios.crear(user, dto, file);
   }
 
   @Patch('atenciones/:id/visto')
@@ -60,4 +102,8 @@ export class OficiosController {
   atender(@CurrentUser() user: AuthenticatedUser, @Param('id', ParseIntPipe) id: number) {
     return this.oficios.atender(user, id);
   }
+
+
+
+ 
 }

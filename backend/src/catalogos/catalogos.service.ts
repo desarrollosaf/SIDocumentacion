@@ -13,12 +13,25 @@ import { Departamento } from '../entities/saf/departamento.entity';
 import { Dependencia } from '../entities/saf/dependencia.entity';
 import { Direccion } from '../entities/saf/direccion.entity';
 import { ServidorPublico } from '../entities/saf/servidor-publico.entity';
+import { TipoApoyo } from '../entities/doc/tipo-apoyo.entity';
 
 export interface Opcion {
   id: number | string;
   nombre: string;
   descripcion?: string | null;
 }
+
+export interface SelectOp {
+  id: number | string;
+  tipo: string;
+  docsApoyo: Select[]
+}
+
+export interface Select {
+  id: number | string;
+  tipo: string;
+}
+
 
 /**
  * Catálogos de apoyo que en Laravel se resolvían con `Arr::pluck` dentro de
@@ -37,6 +50,8 @@ export class CatalogosService {
     @InjectRepository(Subfondo) private readonly subfondos: Repository<Subfondo>,
     @InjectRepository(TipoDoc) private readonly tiposDoc: Repository<TipoDoc>,
     @InjectRepository(TipoAtencion) private readonly tiposAtencion: Repository<TipoAtencion>,
+    @InjectRepository(TipoApoyo) private readonly tiposApoyo: Repository<TipoApoyo>,
+
     @InjectRepository(ServidorPublico, SAF_CONNECTION)
     private readonly servidores: Repository<ServidorPublico>,
     @InjectRepository(Dependencia, SAF_CONNECTION)
@@ -186,4 +201,25 @@ export class CatalogosService {
       nombre: codigo ? `${codigo} — ${nombre ?? ''}` : (nombre ?? ''),
     };
   }
+
+
+ async tipoApoyo(): Promise<SelectOp[]> {
+    const filas = await this.tiposApoyo.find({
+      relations: { docsApoyo: true },
+    });
+
+    const result =  filas.map((t) => ({
+    id: t.id,
+    tipo: t.tipo ?? '',
+    docsApoyo: (t.docsApoyo ?? []).map((d) => ({
+      id: d.id,
+      tipo: d.tipo ?? '',
+    })),
+  }));
+  
+
+  return result;
+  }
+
+  
 }

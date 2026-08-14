@@ -13,10 +13,10 @@ export declare class RegistroDoc {
     subserie_id: number | null;
     expediente_id: number | null;
     tipo_doc: number | null;
-    firmado: number | null;
+    firmado: boolean | false;
     status: number;
     activo: number;
-    created_at: Date | null;
-    updated_at: Date | null;
+    created_at: Date;
+    updated_at: Date;
     destinatarios?: AtencionDoc[];
 }

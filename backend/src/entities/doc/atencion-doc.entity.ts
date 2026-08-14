@@ -51,11 +51,11 @@ export class AtencionDoc {
   @Column({ type: 'tinyint', default: 1 })
   activo: number;
 
-  @CreateDateColumn({ type: 'timestamp', nullable: true })
-  created_at: Date | null;
+  @CreateDateColumn({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
+  created_at: Date;
 
-  @UpdateDateColumn({ type: 'timestamp', nullable: true })
-  updated_at: Date | null;
+  @UpdateDateColumn({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
+  updated_at: Date;
 
   @ManyToOne(() => RegistroDoc, (doc) => doc.destinatarios, { nullable: true })
   @JoinColumn({ name: 'id_registro_doc' })

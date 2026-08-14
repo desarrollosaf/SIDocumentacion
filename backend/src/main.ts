@@ -15,7 +15,7 @@ async function bootstrap() {
   });
 
   app.useGlobalPipes(
-    new ValidationPipe({ whitelist: true, transform: true }),
+    new ValidationPipe({ whitelist: false, transform: true }),
   );
 
   await app.listen(config.get<number>('port', 3000));

@@ -1,7 +1,8 @@
-import { Type } from 'class-transformer';
+import { Transform, Type } from 'class-transformer';
 import {
   ArrayMinSize,
   IsArray,
+  IsBoolean,
   IsIn,
   IsInt,
   IsNotEmpty,
@@ -13,7 +14,7 @@ import {
 export class DestinatarioDto {
   @IsString()
   @IsNotEmpty({ message: 'El RFC del destinatario es obligatorio.' })
-  rfc_atencion: string;
+  rfc: string;
 
   /** Papel en el flujo de firma: `E` elaboró · `R` revisó · `A` autorizó. */
   @IsIn(['E', 'R', 'A'], { message: 'El papel del destinatario no es válido.' })
@@ -25,6 +26,10 @@ export class CrearOficioDto {
   @IsString()
   @IsNotEmpty({ message: 'El título del documento es obligatorio.' })
   titulo_doc: string;
+
+  @IsOptional()
+  @IsString()
+  folio?: string;
 
   @IsOptional()
   @Type(() => Number)
@@ -51,9 +56,37 @@ export class CrearOficioDto {
   @IsInt()
   tipo_doc?: number;
 
-  @IsArray()
-  @ArrayMinSize(1, { message: 'Agrega al menos un destinatario.' })
-  @ValidateNested({ each: true })
-  @Type(() => DestinatarioDto)
-  destinatarios: DestinatarioDto[];
+  @Type(() => Boolean)
+  @IsBoolean()
+  firmado?: boolean;
+
+  @IsOptional()
+  @IsString()
+  hash?: string;
+
+  @IsOptional()
+  @IsString()
+  psw?: string;
+
+
+  @Transform(({ value }) => {
+  if (typeof value === 'string') {
+    try {
+      const parsed = JSON.parse(value);
+      return parsed;
+    } catch (error) {
+      console.log('ERROR AL PARSEAR:', error);
+      return value;
+    }
+  }
+
+  return value;
+})
+@IsArray()
+@ArrayMinSize(1, {
+  message: 'Agrega al menos un destinatario.',
+})
+@ValidateNested({ each: true })
+@Type(() => DestinatarioDto)
+destinatarios: DestinatarioDto[];
 }

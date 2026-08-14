@@ -7,10 +7,28 @@
 <form [formGroup]="formulario" (ngSubmit)="enviar()" novalidate>
   <div class="row g-3">
     <!-- Datos del documento -->
-    <div class="col-12 col-lg-7">
+    <div class="col-12 col-lg-6">
       <section class="sid-card p-4">
         <h2 class="h6 mb-3">Datos del documento</h2>
 
+        <div class="row g-3">
+          <div class="col-6 col-md-4">
+            <label for="folio" class="form-label">Folio</label>
+            <input id="folio" type="text" class="form-control" formControlName="folio" />
+          </div>
+
+          <div class="col-6 col-md-4">
+            <label for="tipo_apoyo" class="form-label">Documento de apoyo <span class="text-danger">*</span></label>
+              <div class="d-flex align-items-center gap-2"> <span>No</span>
+                <div class="form-check form-switch">
+                  <input class="form-check-input" type="checkbox" role="switch" id="tipo_apoyo" formControlName="tipo_apoyo">
+                  <label class="form-check-label" for="tipo_apoyo">Sí</label>
+                </div>
+              </div>
+          </div>
+        </div>
+
+        
         <div class="mb-3">
           <label for="titulo" class="form-label">
             Asunto <span class="text-danger">*</span>
@@ -50,49 +68,81 @@
         <hr class="my-4" />
 
         <h2 class="h6 mb-3">Clasificación archivística</h2>
+      @if (formulario.get('tipo_apoyo')?.value) {
+          <div class="row g-3">
+            <div class="col-12 col-md-6">
+              <label for="tipo_apoyo_id" class="form-label">Tipo de apoyo <span class="text-danger">*</span></label>
+              <select
+                id="tipo_apoyo_id"
+                class="form-select"
+                (change)="alCambiarApoyo(selectApoyo.value)"
+                #selectApoyo
+              >
+                <option value="">Selecciona…</option>
+                @for (apoyo of tiposApoyo(); track apoyo.id) {
+                  <option [value]="apoyo.id">{{ apoyo.tipo }}</option>
+                }
+              </select>
+            </div>
 
-        <div class="row g-3">
-          <div class="col-12 col-md-6">
-            <label for="serie" class="form-label">Serie</label>
-            <select
-              id="serie"
-              class="form-select"
-              (change)="alCambiarSerie(selectSerie.value)"
-              #selectSerie
-            >
-              <option value="">Selecciona…</option>
-              @for (serie of clasificacion(); track serie.id) {
-                <option [value]="serie.id">{{ serie.nombre }}</option>
-              }
-            </select>
+            <div class="col-12 col-md-6">
+              <label for="tipoApoyoVal" class="form-label">Opción <span class="text-danger">*</span></label>
+              <select
+                id="tipoApoyoVal"
+                class="form-select"
+                formControlName="opcion_id"
+                [disabled]="!tipoApoyoVal().length"
+              >
+                <option [ngValue]="null">
+                  {{ tipoApoyoVal().length ? 'Selecciona…' : 'Elige primero un tipo de apoyo' }}
+                </option>
+                @for (op of tipoApoyoVal(); track op.id) {
+                  <option [ngValue]="op.id">{{ op.tipo }}</option>
+                }
+              </select>
+            </div>
           </div>
+        }
+        @else {
+          <div class="row g-3">
+            <div class="col-12 col-md-6">
+              <label for="serie" class="form-label">Serie <span class="text-danger">*</span></label>
+              <select
+                id="serie"
+                class="form-select"
+                (change)="alCambiarSerie(selectSerie.value)"
+                #selectSerie
+              >
+                <option value="">Selecciona…</option>
+                @for (serie of clasificacion(); track serie.id) {
+                  <option [value]="serie.id">{{ serie.nombre }}</option>
+                }
+              </select>
+            </div>
 
-          <div class="col-12 col-md-6">
-            <label for="subserie" class="form-label">Subserie</label>
-            <select
-              id="subserie"
-              class="form-select"
-              formControlName="subserie_id"
-              [disabled]="!subseries().length"
-            >
-              <option [ngValue]="null">
-                {{ subseries().length ? 'Selecciona…' : 'Elige primero una serie' }}
-              </option>
-              @for (sub of subseries(); track sub.id) {
-                <option [ngValue]="sub.id">{{ sub.nombre }}</option>
-              }
-            </select>
+            <div class="col-12 col-md-6">
+              <label for="subserie" class="form-label">Subserie</label>
+              <select
+                id="subserie"
+                class="form-select"
+                formControlName="subserie_id"
+                [disabled]="!subseries().length"
+              >
+                <option [ngValue]="null">
+                  {{ subseries().length ? 'Selecciona…' : 'Elige primero una serie' }}
+                </option>
+                @for (sub of subseries(); track sub.id) {
+                  <option [ngValue]="sub.id">{{ sub.nombre }}</option>
+                }
+              </select>
+            </div>
           </div>
-        </div>
+        }
       </section>
-    </div>
-
-    <!-- Destinatarios -->
-    <div class="col-12 col-lg-5">
+<br>
       <section class="sid-card p-4">
         <h2 class="h6 mb-1">Destinatarios</h2>
         <p class="text-muted-2 small">Busca por nombre en el padrón institucional.</p>
-
         <div class="input-group mb-2">
           <span class="input-group-text">
             <i class="bi bi-search" aria-hidden="true"></i>
@@ -170,6 +220,48 @@
             }
           </ul>
         }
+      </section>
+    </div>
+
+    <div class="col-12 col-lg-6">
+      <section class="sid-card p-4">
+        <h2 class="h6 mb-1">Firmado electrónico</h2>
+        <p class="text-muted-2 small">Seleccione la opción SI para poder hacer uso de la FEAPLEM y firmar electrónicamente el documento; seleccione la opción NO para realizar un el envío de un documento Digital. Sí la opción seleccionada es SÍ, deberás asegurarte de conocer la contraseña que se registró en la Entidad Certificadora al momento de realizar la solicitud, te en cuenta que en caso de ingresar una contraseña invalida por tres ocasiones el módulo de firmado electrónico quedará restringido. Seleccione un archivo para adjuntarlo, asegúrate que el documento que encuentren formato .PDF.</p>
+      
+        <!-- <div class="input-group mb-2"> -->
+          <div class="col-12 col-md-12">
+          <label for="serie" class="form-label">Seleccione un archivo para adjuntar <span class="text-danger">*</span></label>
+          </div>
+          <div class="input-group mb-2">
+          <span class="input-group-text">
+            <i class="bi bi-paperclip" aria-hidden="true"></i>
+          </span>
+          <input type="file" required="true" class="form-control" (change)="seleccionarArchivo($event)">
+          @if (archivoUrl) {
+            <iframe
+              [src]="archivoUrl"
+              width="100%"
+              height="600">
+            </iframe>
+          }
+        </div>
+        <div class="input-group mb-2">
+          <div class="col-6 col-md-4">
+            <label for="firmar_doc" class="form-label">Firmar documento <span class="text-danger">*</span></label>
+              <div class="d-flex align-items-center gap-2"> <span>No</span>
+                <div class="form-check form-switch">
+                  <input class="form-check-input" type="checkbox" role="switch" id="firmar_doc" formControlName="firmar_doc">
+                  <label class="form-check-label" for="tipo_apoyo">Sí</label>
+                </div>
+              </div>
+            </div>
+         
+            <div class="col-6 col-md-4">
+              <label for="firmar_doc" class="form-label">Contraseña certificado <span class="text-danger">*</span></label>
+              <input type="password" class="form-control" id="psw" formControlName="psw" placeholder="Contraseña" (blur)="validarPsw()">
+            </div>
+          </div>
+
       </section>
     </div>
   </div>

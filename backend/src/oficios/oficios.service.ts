@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, NotFoundException, Res } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { In, Repository } from 'typeorm';
 
@@ -10,6 +10,18 @@ import { RegistroDoc } from '../entities/doc/registro-doc.entity';
 import { ServidorPublico } from '../entities/saf/servidor-publico.entity';
 import { CrearOficioDto } from './dto/crear-oficio.dto';
 import { FiltroBandejaDto } from './dto/filtro-bandeja.dto';
+import { use } from 'passport';
+import { HttpService } from '@nestjs/axios';
+import { firstValueFrom } from 'rxjs';
+import { promises as fs } from 'fs';
+import * as path from 'path';
+import { randomUUID } from 'crypto';
+import { PDFDocument, rgb, StandardFonts } from 'pdf-lib';
+import * as qrcode from 'qrcode';
+import { UUID } from 'typeorm/driver/mongodb/bson.typings.js';
+import { ConfigService } from '@nestjs/config';
+import { text } from 'stream/consumers';
+
 
 export interface OficioBandeja {
   id: number;
@@ -37,6 +49,8 @@ export class OficiosService {
     private readonly atenciones: Repository<AtencionDoc>,
     @InjectRepository(ServidorPublico, SAF_CONNECTION)
     private readonly servidores: Repository<ServidorPublico>,
+    private readonly http: HttpService,
+    private readonly configService: ConfigService
   ) {}
 
   /**
@@ -57,7 +71,7 @@ export class OficiosService {
     this.aplicarFiltrosComunes(query, filtro, 'doc');
 
     const [rows, total] = await query
-      .orderBy('a.created_at', 'DESC')
+      .orderBy('a.id', 'DESC')
       .skip((filtro.page - 1) * filtro.perPage)
       .take(filtro.perPage)
       .getManyAndCount();
@@ -176,10 +190,11 @@ export class OficiosService {
   }
 
   /** Registra el oficio y sus destinatarios. Equivale a @saveDoc. */
-  async crear(user: AuthenticatedUser, dto: CrearOficioDto) {
+  async crear(user: AuthenticatedUser, dto: CrearOficioDto, file: any) {
+  
     const doc = await this.registros.save(
       this.registros.create({
-        folio: await this.siguienteFolio(),
+        folio: dto.folio ?? null,
         titulo_doc: dto.titulo_doc,
         fojas: dto.fojas ?? null,
         serie_id: dto.serie_id ?? null,
@@ -187,9 +202,11 @@ export class OficiosService {
         expediente_id: dto.expediente_id ?? null,
         tipo_doc: dto.tipo_doc ?? null,
         rfc_registro: user.rfc,
-        firmado: 0,
+        firmado: dto.firmado ?? false,
         status: 1,
         activo: 1,
+        created_at: new Date(),
+        updated_at: new Date()
       }),
     );
 
@@ -197,14 +214,95 @@ export class OficiosService {
       dto.destinatarios.map((destinatario) =>
         this.atenciones.create({
           id_registro_doc: doc.id,
-          rfc_atencion: destinatario.rfc_atencion,
+          rfc_atencion: destinatario.rfc,
           tipo_atencion: destinatario.tipo_atencion,
+          rfc_turna: user.rfc,
           visto: 0,
           status_atencion: 0,
           activo: 1,
+          created_at: new Date(),
+          updated_at: new Date()
         }),
       ),
     );
+
+    const nombreCarpeta = String(user.c_presup);
+    const directorio = path.join(
+      process.cwd(),
+      'storage',
+      'files',
+      'documentacion',
+      'oficios',
+      nombreCarpeta,
+    );
+
+    await fs.mkdir(directorio, {
+      recursive: true,
+    });
+    const uuid = randomUUID();
+
+    const nombreOriginal = file.originalname
+
+    const rutaArchivo = path.join(
+      directorio,
+      `${uuid}.pdf`,
+    );
+
+    await fs.writeFile(
+      rutaArchivo,
+      file.buffer,
+    );
+    const pathPdf =`documentacion/oficios/${nombreCarpeta}/${uuid}.pdf`;
+
+    doc.path_doc = pathPdf;
+    doc.uuid_doc = uuid;
+
+    const fecha = new Date;
+    const hoy = fecha.toISOString().slice(0, 19).replace('T', ' ');
+
+    //estampar
+     const datosE = {
+        pathPdf: pathPdf,
+        nombreCarpeta: nombreCarpeta,
+        uuid: uuid,
+        uuidQr: uuid,
+        nombreServidor: user.nombre,
+        hash: dto.hash,
+        fecha: hoy,
+      }
+    const resp = this.estampar(datosE);
+
+    //acusar
+    const datosA = {
+      carpeta: nombreCarpeta,
+      uuid: uuid, 
+      hash: dto.hash,
+      hoy: hoy,
+      remitente: user.nombre,
+      qr: (await resp).qrImage,
+    };
+
+    const acuse = this.acuse(datosA);
+  
+    doc.path_doc = pathPdf;
+    doc.uuid_doc = uuid;
+
+    doc.path_acuse = (await acuse).path_acuse;
+    doc.uuid_acuse = (await acuse).uuid_acuse;
+
+    await this.registros.save(doc);
+
+
+    if(doc.firmado == true){
+    const datosF = {
+      path: pathPdf,
+      rfc: user.rfc,
+      docI: uuid, 
+      psw: dto.psw
+    }
+    //firmar doc
+      this.firmarDoc(datosF);
+    }
 
     return this.detalle(doc.id);
   }
@@ -232,6 +330,59 @@ export class OficiosService {
     });
 
     return { message: 'El oficio se marcó como atendido.' };
+  }
+
+  async validarPsw(user: AuthenticatedUser, psw: string){
+    const datos = {
+      'rfc': user.rfc,
+      'password': psw
+    }
+    const feplemUrl = this.configService.get<string>('feplem.baseUrl');
+    try {
+      const response = await firstValueFrom(
+        this.http.post(
+          feplemUrl+'/api/validaCertificados',
+          datos,
+          {
+            headers: {
+              'Content-Type': 'application/json',
+            },
+          },
+        ),
+      );
+      
+      const resp = {
+        hash: String(response.data)
+      }
+      return resp;
+    } catch (error: any) {
+      return error.response?.data;
+    } 
+  }
+
+  async validarFirmado(user: AuthenticatedUser, id: number){
+    const registro = await this.registros.findOne({
+      where:{
+        id: id
+      },
+      relations:{
+        destinatarios: true
+      }
+    })
+
+    if(registro?.rfc_registro != user.rfc){
+      const destinatario = registro?.destinatarios?.find(
+        (d) => d.rfc_atencion === user.rfc
+      );
+
+      if(destinatario?.visto == 0){
+        return false;
+      }else{
+        return true;
+      }
+    }else{
+      return true;
+    }
   }
 
   /** Totales que alimentan el tablero y las insignias del menú. */
@@ -318,4 +469,585 @@ export class OficiosService {
       });
     }
   }
+
+  async estampar(datosE: any){
+
+    const pathDoc = path.join(
+      process.cwd(),
+      'storage',
+      'files',
+      datosE.pathPdf,
+    );
+
+    // 1. Leer PDF original
+    const pdfBytes = await fs.readFile(pathDoc);
+    const pdfOriginal = await PDFDocument.load(pdfBytes);
+  
+    // 2. Crear PDF nuevo
+    const pdfNuevo = await PDFDocument.create();
+
+    // 3. Copiar todas las páginas
+    const paginas = await pdfNuevo.copyPages(
+      pdfOriginal,
+      pdfOriginal.getPageIndices(),
+    );
+    const feplemUrl = this.configService.get<string>('feplem.baseUrl');
+    // 4. Generar QR
+    const urlQr =feplemUrl+`/d/${datosE.nombreCarpeta},${datosE.uuid}`;
+
+    const qrPng = await qrcode.toDataURL(urlQr, {
+      width: 100,
+      margin: 1,
+    });
+    // quitar encabezado data:image/png;base64,
+    const qrBase64 = qrPng.split(',')[1];
+    const qrBytes = Buffer.from(qrBase64, 'base64');
+    const qrImage = await pdfNuevo.embedPng(qrBytes);
+
+    // 5. Fuente
+    const font = await pdfNuevo.embedFont(
+      StandardFonts.Helvetica,
+    );
+
+    const fontBold = await pdfNuevo.embedFont(
+      StandardFonts.HelveticaBold,
+    );
+
+    // 6. Agregar cada página
+    paginas.forEach((pagina: any, index: any) => {
+      const page = pdfNuevo.addPage(pagina);
+      const { width, height } = page.getSize();
+
+      // =========================
+      // POSICIÓN DEL QR
+      // =========================
+
+      const qrX = width - 225;
+      const qrY = height -760;
+
+      page.drawImage(qrImage, {
+        x: qrX,
+        y: qrY,
+        width: 40,
+        height: 40,
+      });
+
+      // =========================
+      // DATOS
+      // =========================
+
+      const textX = qrX + 43;
+
+      page.drawText('Elaboró:', {
+        x: textX,
+        y: qrY + 35,
+        size: 4,
+        font: fontBold,
+      });
+
+      page.drawText(datosE.nombreServidor, {
+        x: textX + 20,
+        y: qrY + 35,
+        size: 4,
+        font,
+      });
+
+      page.drawText(
+        this.formatearFecha(datosE.fecha),
+        {
+          x: textX + 100,
+          y: qrY + 35,
+          size: 4,
+          font,
+        },
+      );
+
+      // =========================
+      // HASH
+      // =========================
+
+      page.drawText('Hash:', {
+        x: textX,
+        y: qrY + 30,
+        size: 4,
+        font: fontBold,
+      });
+
+      page.drawText(datosE.hash, {
+        x: textX + 15,
+        y: qrY + 30,
+        size: 4,
+        font,
+        maxWidth: 100,
+      });
+
+      // =========================
+      // UUID
+      // =========================
+
+      page.drawText(
+        'Identificador único del documento:',
+        {
+          x: textX,
+          y: qrY + 25,
+          size: 4,
+          font: fontBold,
+        },
+      );
+
+      page.drawText(datosE.uuid, {
+        x: textX + 75,
+        y: qrY + 25,
+        size: 4,
+        font,
+      });
+
+      // =========================
+      // TEXTO DE VALIDACIÓN
+      // =========================
+
+      const texto =
+        'Para verificar la integridad de este documento, ' +
+        'favor de escanear el código QR o visitar el enlace ' +
+        'https://feplem.gob.mx/validar-documento. ' +
+        'Para mayor información ingrese a: ' +
+        'https://feplem.gob.mx';
+
+      this.drawTextWrapped(
+        page,
+        texto,
+        {
+          x: textX,
+          y: qrY + 20,
+          maxWidth: 160,
+          size: 4,
+          lineHeight: 5,
+          font,
+        },
+      );
+
+      // =========================
+      // PÁGINA
+      // =========================
+
+      page.drawText(
+        `Página: ${index + 1}/${paginas.length}`,
+        {
+          x: textX,
+          y: qrY + 5,
+          size: 4,
+          font,
+        },
+      );
+    });
+    
+    // 7. Guardar PDF
+    const pdfFinal = await pdfNuevo.save();
+
+    const directorio = path.dirname(datosE.pathPdf);
+  
+    const directorioN = path.join(
+      process.cwd(),
+      'storage',
+      'files',
+      directorio
+    );
+
+    await fs.mkdir(directorioN, {
+      recursive: true,
+    });
+
+    const nuevoPath = path.join(
+      directorioN,
+      `${datosE.uuid}.pdf`,
+    );
+    
+    await fs.writeFile(
+      nuevoPath,
+      pdfFinal,
+      { flag: 'w'}
+    );
+
+    const resp ={
+      qrImage: qrImage, 
+      nuevoPath: nuevoPath,
+    }
+    return resp;
+  }
+
+  private formatearFecha(fecha: Date | string): string {
+    const date = fecha instanceof Date
+    ? fecha
+    : new Date(fecha);
+
+    const pad = (n: number) => String(n).padStart(2, '0');
+
+  return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}T${pad(date.getHours())}:${pad(date.getMinutes())}:${pad(date.getSeconds())}Z`;
+  }
+
+  private drawTextWrapped(
+    page: any,
+    text: string,
+    options: {
+      x: number;
+      y: number;
+      maxWidth: number;
+      size: number;
+      lineHeight: number;
+      font: any;
+    },
+  ) {
+
+    const palabras = text.split(' ');
+
+    let linea = '';
+    let y = options.y;
+
+    for (const palabra of palabras) {
+
+      const prueba =
+        linea.length > 0
+          ? `${linea} ${palabra}`
+          : palabra;
+
+      const ancho =
+        options.font.widthOfTextAtSize(
+          prueba,
+          options.size,
+        );
+
+      if (ancho > options.maxWidth) {
+
+        page.drawText(linea, {
+          x: options.x,
+          y,
+          size: options.size,
+          font: options.font,
+        });
+
+        linea = palabra;
+        y -= options.lineHeight;
+
+      } else {
+        linea = prueba;
+      }
+    }
+
+    if (linea) {
+      page.drawText(linea, {
+        x: options.x,
+        y,
+        size: options.size,
+        font: options.font,
+      });
+    }
+  }
+
+  async firmarDoc(datosF: any){
+    const data = {
+      path: datosF.path,
+      user_rfc: datosF.rfc,
+      contra: datosF.psw,
+      docI: datosF.docI,
+      tipo: 'documentacion/oficios',
+      firma_status: '1',
+      status_doc: '1',
+      firma: 8,
+      tipo_firmante: null,
+      fecha_expedicion: new Date()
+        .toISOString()
+        .slice(0, 19)
+        .replace('T', ' '),
+      fecha_certificacion: new Date()
+        .toISOString()
+        .slice(0, 19)
+        .replace('T', ' '),
+    };
+    const feplemUrl = this.configService.get<string>('feplem.baseUrl');
+    try {
+      const response = await firstValueFrom(
+        this.http.post(
+          feplemUrl+'/api/firmaDocumentos',
+          data,
+          {
+            headers: {
+              'Content-Type': 'application/json',
+            },
+          },
+        ),
+      );
+      return response.data;
+      console.log(
+        'Respuesta firma:',
+        response.data,
+      );
+    } catch (error) {
+      return console.error(error);
+    }
+  }
+
+  async acuse(datos: any){
+    const uuidQr = randomUUID();
+    const uuidA = randomUUID();
+    
+    const fondoPath = path.join(
+      process.cwd(),
+      'storage',
+      'images',
+      'fondo_acuse.png',
+    );
+
+    const directorio = path.join(
+      process.cwd(),
+      'storage',
+      'files',
+      'documentacion',
+      'oficios',
+      datos.carpeta,
+    );
+
+    await fs.mkdir(directorio, {
+      recursive: true,
+    });
+
+    const nuevoPathAcuse = path.join(
+      directorio,
+      `${datos.uuid}_acuse.pdf`,
+    );
+
+    // ---------------------------------------
+    // Crear PDF
+    // ---------------------------------------
+
+    const pdfDoc = await PDFDocument.create();
+
+    // Letter = 612 x 792 puntos
+    const page = pdfDoc.addPage([612, 792]);
+
+    // ---------------------------------------
+    // Fuentes
+    // ---------------------------------------
+
+    const fontBold = await pdfDoc.embedFont(
+      StandardFonts.HelveticaBold,
+    );
+
+    const fontNormal = await pdfDoc.embedFont(
+      StandardFonts.Helvetica,
+    );
+
+    // ---------------------------------------
+    // Fondo
+    // ---------------------------------------
+
+    const fondoBytes = await fs.readFile(fondoPath);
+
+    const fondo = await pdfDoc.embedPng(fondoBytes);
+
+    page.drawImage(fondo, {
+      x: 0,
+      y: 0,
+      width: 612,
+      height: 792,
+    });
+
+    // ---------------------------------------
+    // Título
+    // ---------------------------------------
+
+    page.drawText('Acuse de recibo', {
+      x: 255,
+      y: 792 - 165,
+      size: 12,
+      font: fontBold,
+    });
+
+    // ---------------------------------------
+    // QR
+    // ---------------------------------------
+    const feplemUrl = this.configService.get<string>('feplem.baseUrl');
+    const urlQr = feplemUrl+`/d/${datos.carpeta},${datos.uuid}`;
+
+    const qrPng = await qrcode.toDataURL(urlQr, {
+      width: 100,
+      margin: 1,
+    });
+    // quitar encabezado data:image/png;base64,
+    const qrBase64 = qrPng.split(',')[1];
+    const qrBytes = Buffer.from(qrBase64, 'base64');
+    const qrImage = await pdfDoc.embedPng(qrBytes);
+
+    page.drawImage(qrImage, {
+      x: 319,
+      y: 792 - 774,
+      width: 55,
+      height: 55,
+    });
+    // ---------------------------------------
+    // Remitente
+    // ---------------------------------------
+
+    page.drawText(datos.remitente ?? '', {
+      x: 380,
+      y: 792 - 734,
+      size: 5,
+      font: fontNormal,
+    });
+
+    // ---------------------------------------
+    // Fecha
+    // ---------------------------------------
+
+    page.drawText(datos.hoy ?? '', {
+      x: 500,
+      y: 792 - 734,
+      size: 5,
+      font: fontNormal,
+    });
+
+    // ---------------------------------------
+    // Hash
+    // ---------------------------------------
+
+    page.drawText(datos.hash ?? '', {
+      x: 380,
+      y: 792 - 749,
+      size: 5,
+      font: fontNormal,
+    });
+
+    // ---------------------------------------
+    // UUID
+    // ---------------------------------------
+
+    page.drawText(uuidA, {
+      x: 380,
+      y: 792 - 764,
+      size: 5,
+      font: fontNormal,
+    });
+
+    // ---------------------------------------
+    // UUID nuevamente
+    // ---------------------------------------
+
+    page.drawText(uuidA, {
+      x: 380,
+      y: 792 - 779,
+      size: 5,
+      font: fontNormal,
+    });
+
+    // ---------------------------------------
+    // Guardar PDF
+    // ---------------------------------------
+
+    const pdfFinal = await pdfDoc.save();
+
+    await fs.writeFile(
+      nuevoPathAcuse,
+      pdfFinal,
+      { flag: 'w' },
+    );
+
+    // ---------------------------------------
+    // Datos que guardarías en BD
+    // ---------------------------------------
+
+    const pathPdfAcu =
+      `documentacion/oficios/${datos.carpeta}/${datos.uuid}_acuse.pdf`;
+
+    return {
+      path_acuse: pathPdfAcu,
+      uuid_acuse: uuidA,
+    };
+  }
+
+  async verPdf(id: number, tipo: number): Promise<string>{
+    const registro = await this.registros.findOne({
+      where:{
+        id: id
+      }
+    }); 
+
+    const pathDoc = tipo === 1
+      ? registro?.path_doc
+      : tipo === 2
+      ? registro?.path_acuse
+      : null;
+
+    const ruta = path.join(
+      process.cwd(),
+      'storage',
+      'files',
+      pathDoc ?? '',
+    );
+    return ruta;
+  }
+
+async firmarDocAcuse(id: number, psw: string, user:AuthenticatedUser){
+    const registro = await this.registros.findOne({
+      where:{
+        id: id
+      },
+      relations:{
+        destinatarios: true
+      }
+    });
+
+     if(registro?.rfc_registro != user.rfc){
+      const destinatario = registro?.destinatarios?.find(
+        (d) => d.rfc_atencion === user.rfc
+      );
+
+    if(destinatario){
+      const at = destinatario.tipo_atencion.split(',');
+      let firma;
+      for (const element of at) {
+          const datos = {
+            path: registro?.path_acuse,
+            user_rfc: user.rfc,
+            contra: psw,
+            docI: registro?.uuid_doc,
+            tipo: 'documentacion/oficios',
+            firma_status: '0',
+            status_doc: '1',
+            firma: 8,
+            tipo_firmante: element,
+            fecha_expedicion: new Date,
+            fecha_certificacion: new Date
+          }
+          firma = await this.firmarAcuse(datos);
+        }
+        if(firma === 1){
+          this.atenciones.update(
+            { id: destinatario.id },
+            { visto: 1, fecha_visto: new Date() },
+          );
+        }
+      return 1;
+    }
+  }
 }
+
+  async firmarAcuse(datos: any){
+    const feplemUrl = this.configService.get<string>('feplem.baseUrl');
+    try {
+      const response = await firstValueFrom(
+        this.http.post(
+          feplemUrl+'/api/firmaDocumentos',
+          datos,
+          {
+            headers: {
+              'Content-Type': 'application/json',
+            },
+          },
+        ),
+      );
+      return response.data;
+    } catch (error: any) {
+      return error.response?.data;
+    } 
+  }
+}
+

@@ -104,6 +104,9 @@
                   <span class="d-block text-muted-2 small">
                     {{ oficio.folio }} · {{ oficio.contraparte }}
                   </span>
+                   <span class="d-block text-muted-2 small">
+                    Recepción:  {{ oficio.created_at }}
+                  </span>
                 </span>
                 <sid-estado-badge [atendido]="oficio.atendido" [visto]="oficio.visto" />
               </a>

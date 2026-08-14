@@ -23,6 +23,8 @@ const seccion_entity_1 = require("../entities/doc/seccion.entity");
 const serie_entity_1 = require("../entities/doc/serie.entity");
 const sub_serie_entity_1 = require("../entities/doc/sub-serie.entity");
 const subfondo_entity_1 = require("../entities/doc/subfondo.entity");
+const tipo_apoyo_entity_1 = require("../entities/doc/tipo-apoyo.entity");
+const docs_tipo_apoyo_entity_1 = require("../entities/doc/docs-tipo-apoyo.entity");
 const departamento_entity_1 = require("../entities/saf/departamento.entity");
 const dependencia_entity_1 = require("../entities/saf/dependencia.entity");
 const direccion_entity_1 = require("../entities/saf/direccion.entity");
@@ -43,6 +45,8 @@ exports.DOC_ENTITIES = [
     subfondo_entity_1.Subfondo,
     catalogos_entity_1.TipoAtencion,
     catalogos_entity_1.TipoDoc,
+    tipo_apoyo_entity_1.TipoApoyo,
+    docs_tipo_apoyo_entity_1.DocTipoApoyo,
 ];
 exports.SAF_ENTITIES = [
     departamento_entity_1.Departamento,

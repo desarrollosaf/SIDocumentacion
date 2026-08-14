@@ -88,7 +88,7 @@ __decorate([
 ], RegistroDoc.prototype, "tipo_doc", void 0);
 __decorate([
     (0, typeorm_1.Column)({ type: 'tinyint', nullable: true }),
-    __metadata("design:type", Object)
+    __metadata("design:type", Boolean)
 ], RegistroDoc.prototype, "firmado", void 0);
 __decorate([
     (0, typeorm_1.Column)({ type: 'tinyint', default: 1 }),
@@ -99,12 +99,12 @@ __decorate([
     __metadata("design:type", Number)
 ], RegistroDoc.prototype, "activo", void 0);
 __decorate([
-    (0, typeorm_1.CreateDateColumn)({ type: 'timestamp', nullable: true }),
-    __metadata("design:type", Object)
+    (0, typeorm_1.CreateDateColumn)({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' }),
+    __metadata("design:type", Date)
 ], RegistroDoc.prototype, "created_at", void 0);
 __decorate([
-    (0, typeorm_1.UpdateDateColumn)({ type: 'timestamp', nullable: true }),
-    __metadata("design:type", Object)
+    (0, typeorm_1.UpdateDateColumn)({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' }),
+    __metadata("design:type", Date)
 ], RegistroDoc.prototype, "updated_at", void 0);
 __decorate([
     (0, typeorm_1.OneToMany)(() => atencion_doc_entity_1.AtencionDoc, (atencion) => atencion.registroDoc),

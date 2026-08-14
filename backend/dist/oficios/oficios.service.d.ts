@@ -6,6 +6,8 @@ import { RegistroDoc } from '../entities/doc/registro-doc.entity';
 import { ServidorPublico } from '../entities/saf/servidor-publico.entity';
 import { CrearOficioDto } from './dto/crear-oficio.dto';
 import { FiltroBandejaDto } from './dto/filtro-bandeja.dto';
+import { HttpService } from '@nestjs/axios';
+import { ConfigService } from '@nestjs/config';
 export interface OficioBandeja {
     id: number;
     atencion_id: number | null;
@@ -25,7 +27,9 @@ export declare class OficiosService {
     private readonly registros;
     private readonly atenciones;
     private readonly servidores;
-    constructor(registros: Repository<RegistroDoc>, atenciones: Repository<AtencionDoc>, servidores: Repository<ServidorPublico>);
+    private readonly http;
+    private readonly configService;
+    constructor(registros: Repository<RegistroDoc>, atenciones: Repository<AtencionDoc>, servidores: Repository<ServidorPublico>, http: HttpService, configService: ConfigService);
     bandejaEntrada(user: AuthenticatedUser, filtro: FiltroBandejaDto): Promise<Paginated<OficioBandeja>>;
     bandejaSalida(user: AuthenticatedUser, filtro: FiltroBandejaDto): Promise<Paginated<OficioBandeja>>;
     detalle(id: number): Promise<{
@@ -43,8 +47,8 @@ export declare class OficiosService {
             tipo_atencion: string;
             rfc_turna: string | null;
             activo: number;
-            created_at: Date | null;
-            updated_at: Date | null;
+            created_at: Date;
+            updated_at: Date;
             registroDoc?: RegistroDoc | null;
         }[];
         id: number;
@@ -60,13 +64,13 @@ export declare class OficiosService {
         subserie_id: number | null;
         expediente_id: number | null;
         tipo_doc: number | null;
-        firmado: number | null;
+        firmado: boolean | false;
         status: number;
         activo: number;
-        created_at: Date | null;
-        updated_at: Date | null;
+        created_at: Date;
+        updated_at: Date;
     }>;
-    crear(user: AuthenticatedUser, dto: CrearOficioDto): Promise<{
+    crear(user: AuthenticatedUser, dto: CrearOficioDto, file: any): Promise<{
         remitente: string;
         destinatarios: {
             nombre: string;
@@ -81,8 +85,8 @@ export declare class OficiosService {
             tipo_atencion: string;
             rfc_turna: string | null;
             activo: number;
-            created_at: Date | null;
-            updated_at: Date | null;
+            created_at: Date;
+            updated_at: Date;
             registroDoc?: RegistroDoc | null;
         }[];
         id: number;
@@ -98,11 +102,11 @@ export declare class OficiosService {
         subserie_id: number | null;
         expediente_id: number | null;
         tipo_doc: number | null;
-        firmado: number | null;
+        firmado: boolean | false;
         status: number;
         activo: number;
-        created_at: Date | null;
-        updated_at: Date | null;
+        created_at: Date;
+        updated_at: Date;
     }>;
     marcarVisto(user: AuthenticatedUser, atencionId: number): Promise<{
         message: string;
@@ -110,6 +114,8 @@ export declare class OficiosService {
     atender(user: AuthenticatedUser, atencionId: number): Promise<{
         message: string;
     }>;
+    validarPsw(user: AuthenticatedUser, psw: string): Promise<any>;
+    validarFirmado(user: AuthenticatedUser, id: number): Promise<boolean>;
     resumen(user: AuthenticatedUser): Promise<{
         entradaPendientes: number;
         entradaSinVer: number;
@@ -120,4 +126,17 @@ export declare class OficiosService {
     private nombresPorRfc;
     private aplicarEstado;
     private aplicarFiltrosComunes;
+    estampar(datosE: any): Promise<{
+        qrImage: import("pdf-lib").PDFImage;
+        nuevoPath: string;
+    }>;
+    private formatearFecha;
+    private drawTextWrapped;
+    firmarDoc(datosF: any): Promise<any>;
+    acuse(datos: any): Promise<{
+        path_acuse: string;
+        uuid_acuse: `${string}-${string}-${string}-${string}-${string}`;
+    }>;
+    verPdf(id: number, tipo: number): Promise<string>;
+    firmarDocAcuse(id: number, psw: string, user: AuthenticatedUser): Promise<true | undefined>;
 }
