@@ -5,9 +5,11 @@ FROM node:24-alpine AS build
 
 WORKDIR /app
 
+ENV NODE_ENV=development
+
 COPY package.json package-lock.json ./
 
-RUN npm ci
+RUN npm ci --include=dev
 
 COPY . .
 
@@ -30,7 +32,6 @@ RUN npm ci --omit=dev \
 
 COPY --from=build /app/dist ./dist
 
-# Crea la carpeta persistente de documentos
 RUN mkdir -p /app/storage
 
 EXPOSE 3050
