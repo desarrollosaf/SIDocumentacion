@@ -1,15 +1,20 @@
 # ============================================
-# Etapa 1: instalar y compilar NestJS
+# Etapa 1: compilar NestJS
 # ============================================
 FROM node:24-alpine AS build
 
 WORKDIR /app
 
+# IMPORTANTE: durante el build necesitamos devDependencies
 ENV NODE_ENV=development
 
 COPY package.json package-lock.json ./
 
 RUN npm ci --include=dev
+
+# Comprobación: debe existir el CLI de Nest
+RUN ls -la node_modules/.bin/nest \
+    && node_modules/.bin/nest --version
 
 COPY . .
 
@@ -17,7 +22,7 @@ RUN npm run build
 
 
 # ============================================
-# Etapa 2: imagen final de producción
+# Etapa 2: producción
 # ============================================
 FROM node:24-alpine AS production
 
