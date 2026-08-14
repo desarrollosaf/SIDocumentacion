@@ -13,10 +13,11 @@ import { Direccion } from '../entities/saf/direccion.entity';
 import { ServidorPublico } from '../entities/saf/servidor-publico.entity';
 import { CatalogosController } from './catalogos.controller';
 import { CatalogosService } from './catalogos.service';
-
+import { TipoApoyo } from '../entities/doc/tipo-apoyo.entity';
+import { DocTipoApoyo } from '../entities/doc/docs-tipo-apoyo.entity';
 @Module({
   imports: [
-    TypeOrmModule.forFeature([Seccion, Serie, SubSerie, Subfondo, TipoDoc, TipoAtencion]),
+    TypeOrmModule.forFeature([Seccion, Serie, SubSerie, Subfondo, TipoDoc, TipoAtencion, TipoApoyo, DocTipoApoyo]),
     TypeOrmModule.forFeature(
       [ServidorPublico, Dependencia, Direccion, Departamento],
       SAF_CONNECTION,
@@ -27,3 +28,5 @@ import { CatalogosService } from './catalogos.service';
   exports: [CatalogosService],
 })
 export class CatalogosModule {}
+
+

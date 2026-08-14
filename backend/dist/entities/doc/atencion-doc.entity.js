@@ -69,12 +69,12 @@ __decorate([
     __metadata("design:type", Number)
 ], AtencionDoc.prototype, "activo", void 0);
 __decorate([
-    (0, typeorm_1.CreateDateColumn)({ type: 'timestamp', nullable: true }),
-    __metadata("design:type", Object)
+    (0, typeorm_1.CreateDateColumn)({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' }),
+    __metadata("design:type", Date)
 ], AtencionDoc.prototype, "created_at", void 0);
 __decorate([
-    (0, typeorm_1.UpdateDateColumn)({ type: 'timestamp', nullable: true }),
-    __metadata("design:type", Object)
+    (0, typeorm_1.UpdateDateColumn)({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' }),
+    __metadata("design:type", Date)
 ], AtencionDoc.prototype, "updated_at", void 0);
 __decorate([
     (0, typeorm_1.ManyToOne)(() => registro_doc_entity_1.RegistroDoc, (doc) => doc.destinatarios, { nullable: true }),

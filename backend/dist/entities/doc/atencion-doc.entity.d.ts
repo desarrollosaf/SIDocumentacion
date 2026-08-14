@@ -10,7 +10,7 @@ export declare class AtencionDoc {
     tipo_atencion: string;
     rfc_turna: string | null;
     activo: number;
-    created_at: Date | null;
-    updated_at: Date | null;
+    created_at: Date;
+    updated_at: Date;
     registroDoc?: RegistroDoc | null;
 }

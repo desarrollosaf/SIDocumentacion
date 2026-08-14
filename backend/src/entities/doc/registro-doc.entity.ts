@@ -54,7 +54,7 @@ export class RegistroDoc {
   tipo_doc: number | null;
 
   @Column({ type: 'tinyint', nullable: true })
-  firmado: number | null;
+  firmado: boolean | false;
 
   @Column({ type: 'tinyint', default: 1 })
   status: number;
@@ -62,11 +62,11 @@ export class RegistroDoc {
   @Column({ type: 'tinyint', default: 1 })
   activo: number;
 
-  @CreateDateColumn({ type: 'timestamp', nullable: true })
-  created_at: Date | null;
+  @CreateDateColumn({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP'})
+  created_at: Date;
 
-  @UpdateDateColumn({ type: 'timestamp', nullable: true })
-  updated_at: Date | null;
+  @UpdateDateColumn({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP'})
+  updated_at: Date;
 
   @OneToMany(() => AtencionDoc, (atencion) => atencion.registroDoc)
   destinatarios?: AtencionDoc[];

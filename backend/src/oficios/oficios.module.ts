@@ -7,11 +7,13 @@ import { RegistroDoc } from '../entities/doc/registro-doc.entity';
 import { ServidorPublico } from '../entities/saf/servidor-publico.entity';
 import { OficiosController } from './oficios.controller';
 import { OficiosService } from './oficios.service';
+import { HttpModule } from '@nestjs/axios';
 
 @Module({
   imports: [
     TypeOrmModule.forFeature([RegistroDoc, AtencionDoc]),
     TypeOrmModule.forFeature([ServidorPublico], SAF_CONNECTION),
+    HttpModule
   ],
   controllers: [OficiosController],
   providers: [OficiosService],

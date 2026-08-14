@@ -3,7 +3,7 @@ import { Injectable, inject } from '@angular/core';
 import { Observable, shareReplay } from 'rxjs';
 
 import { environment } from '../../../environments/environment';
-import { Opcion, OpcionClasificacion, ServidorPublico } from '../models';
+import { Opcion, OpcionApoyo, OpcionClasificacion, ServidorPublico } from '../models';
 import { aHttpParams } from './http-params.util';
 
 @Injectable({ providedIn: 'root' })
@@ -65,5 +65,15 @@ export class CatalogosService {
     }
 
     return this.cache.get(recurso)!;
+  } 
+
+  tiposApoyo(){
+    return this.http.get<OpcionApoyo[]>(`${this.base}/tipo_doc_apoyos`);
   }
+
+  // tipoApoyoOp(tipo_apoyo_id?: number) {
+  //   return this.http.get<Select[]>(`${this.base}/documentos_apoyos`, {
+  //     params: aHttpParams({ tipo_apoyo_id }),
+  //   });
+  // }
 }

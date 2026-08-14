@@ -25,4 +25,5 @@ export declare class CatalogosController {
         direccion: string | null;
         departamento: string | null;
     }[]>;
+    tipoApoyo(): Promise<import("./catalogos.service").SelectOp[]>;
 }

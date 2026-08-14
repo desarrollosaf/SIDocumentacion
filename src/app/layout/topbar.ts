@@ -51,4 +51,5 @@ export class Topbar {
     this.cerrarPaneles();
     this.auth.cerrarSesion();
   }
+
 }

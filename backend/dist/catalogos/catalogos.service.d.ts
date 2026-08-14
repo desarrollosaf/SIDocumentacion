@@ -9,10 +9,20 @@ import { Departamento } from '../entities/saf/departamento.entity';
 import { Dependencia } from '../entities/saf/dependencia.entity';
 import { Direccion } from '../entities/saf/direccion.entity';
 import { ServidorPublico } from '../entities/saf/servidor-publico.entity';
+import { TipoApoyo } from '../entities/doc/tipo-apoyo.entity';
 export interface Opcion {
     id: number | string;
     nombre: string;
     descripcion?: string | null;
+}
+export interface SelectOp {
+    id: number | string;
+    tipo: string;
+    docsApoyo: Select[];
+}
+export interface Select {
+    id: number | string;
+    tipo: string;
 }
 export declare class CatalogosService {
     private readonly secciones;
@@ -21,11 +31,12 @@ export declare class CatalogosService {
     private readonly subfondos;
     private readonly tiposDoc;
     private readonly tiposAtencion;
+    private readonly tiposApoyo;
     private readonly servidores;
     private readonly dependencias;
     private readonly direcciones;
     private readonly departamentos;
-    constructor(secciones: Repository<Seccion>, series: Repository<Serie>, subseries: Repository<SubSerie>, subfondos: Repository<Subfondo>, tiposDoc: Repository<TipoDoc>, tiposAtencion: Repository<TipoAtencion>, servidores: Repository<ServidorPublico>, dependencias: Repository<Dependencia>, direcciones: Repository<Direccion>, departamentos: Repository<Departamento>);
+    constructor(secciones: Repository<Seccion>, series: Repository<Serie>, subseries: Repository<SubSerie>, subfondos: Repository<Subfondo>, tiposDoc: Repository<TipoDoc>, tiposAtencion: Repository<TipoAtencion>, tiposApoyo: Repository<TipoApoyo>, servidores: Repository<ServidorPublico>, dependencias: Repository<Dependencia>, direcciones: Repository<Direccion>, departamentos: Repository<Departamento>);
     listarSecciones(): Promise<Opcion[]>;
     listarSeries(seccionId?: number): Promise<Opcion[]>;
     listarSubseries(serieId?: number): Promise<Opcion[]>;
@@ -49,4 +60,5 @@ export declare class CatalogosService {
         descripcion?: string | null;
     }[]>;
     private aOpcion;
+    tipoApoyo(): Promise<SelectOp[]>;
 }

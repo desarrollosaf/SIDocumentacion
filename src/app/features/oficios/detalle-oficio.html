@@ -23,7 +23,7 @@
     <!-- Datos del documento -->
     <div class="col-12 col-lg-7">
       <section class="sid-card p-4 h-100">
-        <h2 class="h6 mb-3">Datos del documento</h2>
+        <h2 class="h6 mb-3">Datos del documento </h2>
 
         <dl class="row mb-0 small">
           <dt class="col-sm-4 text-muted-2 fw-normal">Folio</dt>
@@ -38,7 +38,7 @@
           <dt class="col-sm-4 text-muted-2 fw-normal">Fojas</dt>
           <dd class="col-sm-8 tabular">{{ oficio()!.fojas ?? '—' }}</dd>
 
-          <dt class="col-sm-4 text-muted-2 fw-normal">Fecha de registro</dt>
+          <dt class="col-sm-4 text-muted-2 fw-normal">Fecha de emición</dt>
           <dd class="col-sm-8 tabular">
             {{ oficio()!.created_at | date: 'dd/MM/yyyy HH:mm' }}
           </dd>
@@ -60,6 +60,78 @@
             <span class="text-muted-2 d-block">Identificador del documento</span>
             <code class="text-break">{{ oficio()!.uuid_doc }}</code>
           </div>
+        <div class="alert alert-light border mt-3 mb-0 small">
+          <h2 class="h6 mb-3">Documentos adjuntos </h2>
+            <div class="row">
+              <div class="col-sm-4">
+                <a (click)="verPdf( oficio()!.id, 1)" class="d-flex align-items-center gap-2 text-decoration-none">
+                  <dt class="text-muted-2 fw-normal">PDF</dt>
+                  <i class="bi bi-filetype-pdf"></i>
+                </a>
+              </div>
+              <div class="col-sm-4">
+                <a href="#" class="d-flex align-items-center gap-2 text-decoration-none">
+                  <dt class="text-muted-2 fw-normal">XML</dt>
+                  <i class="bi bi-filetype-xml"></i>
+                </a>
+              </div>
+              <div class="col-sm-4">
+                 <a (click)="verPdf( oficio()!.id, 2)" class="d-flex align-items-center gap-2 text-decoration-none">
+                    <dt class="text-muted-2 fw-normal">ACUSE</dt>
+                    <i class="bi bi-filetype-pdf"></i>
+                 </a>
+              </div>
+            </div>
+            <br>
+            <div class="row">
+               @if (modalFirmaAbierto()){
+                <form [formGroup]="formulario"  novalidate>
+                  <div class="modal fade show d-block" tabindex="-1" role="dialog">
+                    <div class="modal-dialog modal-dialog-centered">
+                      <div class="modal-content">
+                          <div class="modal-header">
+                            <h5 class="modal-title">Firmado electrónico </h5>
+                            <button type="button" class="btn-close" (click)="cerrarModalFirma()" title="Cerrar"></button>
+                          </div>
+
+                          <div class="modal-body">
+                            <label class="form-label"> Para firmar electrónicamente el documento, ingrese la contraseña de la FEAPLEM.</label>
+                            <input type="password" class="form-control" id="psw" formControlName="psw" placeholder="Contraseña" (blur)="validarPsw()">
+                          </div>
+                          <br>
+
+                          <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" (click)="cerrarModalFirma()">
+                              Cancelar
+                            </button>
+
+                            <button type="button" class="btn btn-primary" (click)="firmarDoc(oficio()!.id)">
+                              Firmar
+                            </button>
+                          </div>
+
+                        </div>
+                      </div>
+                    </div>
+                  </form>
+                }
+               @if (archivoUrl) {
+                <div class="visor-documento">
+                  <div class="visor-header" style="width: 100%; display: flex; justify-content: center; align-items: center;">
+                    <span>Vista previa del documento</span>
+                    <button type="button" class="btn btn-sm btn-light" (click)="cerrarVisor()" title="Cerrar">
+                      <i class="bi bi-x-lg"></i>
+                    </button>
+                  </div>
+                  <iframe
+                    [src]="archivoUrl"
+                    width="90%"
+                    height="400">
+                  </iframe>
+                </div>
+              }
+            </div>
+        </div>
         }
       </section>
     </div>
@@ -76,11 +148,10 @@
             <li class="px-3 py-3 border-bottom">
               <div class="d-flex justify-content-between align-items-start gap-2">
                 <div class="min-w-0">
-                  <p class="mb-0 fw-semibold small text-truncate">{{ destinatario.nombre }}</p>
+                  <p class="mb-0 fw-semibold small text-truncate">  {{ etiquetaPapel(destinatario.tipo_atencion) }} {{ destinatario.nombre }}</p>
                   <p class="mb-0 text-muted-2" style="font-size: 0.75rem">
-                    {{ etiquetaPapel(destinatario.tipo_atencion) }}
                     @if (destinatario.turnado_por) {
-                      · turnado por {{ destinatario.turnado_por }}
+                      TURNO {{ destinatario.turnado_por }}
                     }
                   </p>
                 </div>
@@ -114,5 +185,11 @@
         </ul>
       </section>
     </div>
+   
+
   </div>
+
+
+  
+  
 }

@@ -15,6 +15,7 @@ const registro_doc_entity_1 = require("../entities/doc/registro-doc.entity");
 const servidor_publico_entity_1 = require("../entities/saf/servidor-publico.entity");
 const oficios_controller_1 = require("./oficios.controller");
 const oficios_service_1 = require("./oficios.service");
+const axios_1 = require("@nestjs/axios");
 let OficiosModule = class OficiosModule {
 };
 exports.OficiosModule = OficiosModule;
@@ -23,6 +24,7 @@ exports.OficiosModule = OficiosModule = __decorate([
         imports: [
             typeorm_1.TypeOrmModule.forFeature([registro_doc_entity_1.RegistroDoc, atencion_doc_entity_1.AtencionDoc]),
             typeorm_1.TypeOrmModule.forFeature([servidor_publico_entity_1.ServidorPublico], configuration_1.SAF_CONNECTION),
+            axios_1.HttpModule
         ],
         controllers: [oficios_controller_1.OficiosController],
         providers: [oficios_service_1.OficiosService],

@@ -18,6 +18,7 @@ const current_user_decorator_1 = require("../common/decorators/current-user.deco
 const crear_oficio_dto_1 = require("./dto/crear-oficio.dto");
 const filtro_bandeja_dto_1 = require("./dto/filtro-bandeja.dto");
 const oficios_service_1 = require("./oficios.service");
+const platform_express_1 = require("@nestjs/platform-express");
 let OficiosController = class OficiosController {
     oficios;
     constructor(oficios) {
@@ -35,8 +36,24 @@ let OficiosController = class OficiosController {
     detalle(id) {
         return this.oficios.detalle(id);
     }
-    crear(user, dto) {
-        return this.oficios.crear(user, dto);
+    validarPsw(user, psw) {
+        return this.oficios.validarPsw(user, psw);
+    }
+    validarFirmado(user, id) {
+        return this.oficios.validarFirmado(user, id);
+    }
+    async verPdf(id, tipo, res) {
+        const ruta = await this.oficios.verPdf(id, tipo);
+        return res.sendFile(ruta);
+    }
+    async firmarDoc(id, psw, user) {
+        return this.oficios.firmarDocAcuse(id, psw, user);
+    }
+    crear(file, user, dto) {
+        if (typeof dto.destinatarios === 'string') {
+            dto.destinatarios = JSON.parse(dto.destinatarios);
+        }
+        return this.oficios.crear(user, dto, file);
     }
     marcarVisto(user, id) {
         return this.oficios.marcarVisto(user, id);
@@ -77,11 +94,47 @@ __decorate([
     __metadata("design:returntype", void 0)
 ], OficiosController.prototype, "detalle", null);
 __decorate([
-    (0, common_1.Post)(),
+    (0, common_1.Get)('validarPsw/:psw'),
     __param(0, (0, current_user_decorator_1.CurrentUser)()),
-    __param(1, (0, common_1.Body)()),
+    __param(1, (0, common_1.Param)('psw')),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [Object, crear_oficio_dto_1.CrearOficioDto]),
+    __metadata("design:paramtypes", [Object, String]),
+    __metadata("design:returntype", void 0)
+], OficiosController.prototype, "validarPsw", null);
+__decorate([
+    (0, common_1.Get)('validarFirmado/:id'),
+    __param(0, (0, current_user_decorator_1.CurrentUser)()),
+    __param(1, (0, common_1.Param)('id')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object, Number]),
+    __metadata("design:returntype", void 0)
+], OficiosController.prototype, "validarFirmado", null);
+__decorate([
+    (0, common_1.Get)('verPdf/:id/:tipo'),
+    __param(0, (0, common_1.Param)('id', common_1.ParseIntPipe)),
+    __param(1, (0, common_1.Param)('tipo', common_1.ParseIntPipe)),
+    __param(2, (0, common_1.Res)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Number, Number, Object]),
+    __metadata("design:returntype", Promise)
+], OficiosController.prototype, "verPdf", null);
+__decorate([
+    (0, common_1.Get)('firmarDoc/:id/:psw'),
+    __param(0, (0, common_1.Param)('id', common_1.ParseIntPipe)),
+    __param(1, (0, common_1.Param)('psw')),
+    __param(2, (0, current_user_decorator_1.CurrentUser)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Number, String, Object]),
+    __metadata("design:returntype", Promise)
+], OficiosController.prototype, "firmarDoc", null);
+__decorate([
+    (0, common_1.Post)(),
+    (0, common_1.UseInterceptors)((0, platform_express_1.FileInterceptor)('file')),
+    __param(0, (0, common_1.UploadedFile)()),
+    __param(1, (0, current_user_decorator_1.CurrentUser)()),
+    __param(2, (0, common_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object, Object, crear_oficio_dto_1.CrearOficioDto]),
     __metadata("design:returntype", void 0)
 ], OficiosController.prototype, "crear", null);
 __decorate([

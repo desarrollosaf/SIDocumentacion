@@ -43,6 +43,15 @@ export interface Opcion {
   descripcion?: string | null;
 }
 
+export interface Select {
+  id: number | string;
+  tipo: string;
+}
+
+export interface OpcionApoyo extends Select {
+  docsApoyo: Select[];
+}
+
 export interface OpcionClasificacion extends Opcion {
   subseries: Opcion[];
 }

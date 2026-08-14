@@ -54,6 +54,9 @@ let CatalogosController = class CatalogosController {
     servidores(user, q = '') {
         return this.catalogos.buscarServidores(q, user.rfc);
     }
+    tipoApoyo() {
+        return this.catalogos.tipoApoyo();
+    }
 };
 exports.CatalogosController = CatalogosController;
 __decorate([
@@ -129,6 +132,12 @@ __decorate([
     __metadata("design:paramtypes", [Object, Object]),
     __metadata("design:returntype", void 0)
 ], CatalogosController.prototype, "servidores", null);
+__decorate([
+    (0, common_1.Get)('tipo_doc_apoyos'),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", []),
+    __metadata("design:returntype", void 0)
+], CatalogosController.prototype, "tipoApoyo", null);
 exports.CatalogosController = CatalogosController = __decorate([
     (0, common_1.Controller)('catalogos'),
     __metadata("design:paramtypes", [catalogos_service_1.CatalogosService])

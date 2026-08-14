@@ -2,6 +2,7 @@ import type { AuthenticatedUser } from '../common/interfaces/authenticated-user.
 import { CrearOficioDto } from './dto/crear-oficio.dto';
 import { FiltroBandejaDto } from './dto/filtro-bandeja.dto';
 import { OficiosService } from './oficios.service';
+import type { Response } from 'express';
 export declare class OficiosController {
     private readonly oficios;
     constructor(oficios: OficiosService);
@@ -27,8 +28,8 @@ export declare class OficiosController {
             tipo_atencion: string;
             rfc_turna: string | null;
             activo: number;
-            created_at: Date | null;
-            updated_at: Date | null;
+            created_at: Date;
+            updated_at: Date;
             registroDoc?: import("../entities/doc/registro-doc.entity").RegistroDoc | null;
         }[];
         id: number;
@@ -44,13 +45,17 @@ export declare class OficiosController {
         subserie_id: number | null;
         expediente_id: number | null;
         tipo_doc: number | null;
-        firmado: number | null;
+        firmado: boolean | false;
         status: number;
         activo: number;
-        created_at: Date | null;
-        updated_at: Date | null;
+        created_at: Date;
+        updated_at: Date;
     }>;
-    crear(user: AuthenticatedUser, dto: CrearOficioDto): Promise<{
+    validarPsw(user: AuthenticatedUser, psw: string): Promise<any>;
+    validarFirmado(user: AuthenticatedUser, id: number): Promise<boolean>;
+    verPdf(id: number, tipo: number, res: Response): Promise<void>;
+    firmarDoc(id: number, psw: string, user: AuthenticatedUser): Promise<true | undefined>;
+    crear(file: Express.Multer.File, user: AuthenticatedUser, dto: CrearOficioDto): Promise<{
         remitente: string;
         destinatarios: {
             nombre: string;
@@ -65,8 +70,8 @@ export declare class OficiosController {
             tipo_atencion: string;
             rfc_turna: string | null;
             activo: number;
-            created_at: Date | null;
-            updated_at: Date | null;
+            created_at: Date;
+            updated_at: Date;
             registroDoc?: import("../entities/doc/registro-doc.entity").RegistroDoc | null;
         }[];
         id: number;
@@ -82,11 +87,11 @@ export declare class OficiosController {
         subserie_id: number | null;
         expediente_id: number | null;
         tipo_doc: number | null;
-        firmado: number | null;
+        firmado: boolean | false;
         status: number;
         activo: number;
-        created_at: Date | null;
-        updated_at: Date | null;
+        created_at: Date;
+        updated_at: Date;
     }>;
     marcarVisto(user: AuthenticatedUser, id: number): Promise<{
         message: string;

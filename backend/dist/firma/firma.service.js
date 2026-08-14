@@ -106,7 +106,7 @@ let FirmaService = class FirmaService {
         if (!firmado) {
             throw new common_1.BadRequestException('El servicio de firma electrónica rechazó la solicitud. Verifica el documento e intenta de nuevo.');
         }
-        await this.oficios.update(oficio.id, { firmado: 1 });
+        await this.oficios.update(oficio.id, { firmado: true });
         return { message: `El oficio ${oficio.folio ?? ''} quedó firmado.`.trim(), hash };
     }
     async firmarDocumento(user, id, password) {

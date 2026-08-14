@@ -62,4 +62,9 @@ export class CatalogosController {
   servidores(@CurrentUser() user: AuthenticatedUser, @Query('q') q = '') {
     return this.catalogos.buscarServidores(q, user.rfc);
   }
+
+  @Get('tipo_doc_apoyos')
+  tipoApoyo() {
+    return this.catalogos.tipoApoyo();
+  }
 }

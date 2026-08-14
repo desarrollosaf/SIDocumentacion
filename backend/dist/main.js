@@ -12,7 +12,7 @@ async function bootstrap() {
         origin: config.get('corsOrigin', ['http://localhost:4200']),
         credentials: true,
     });
-    app.useGlobalPipes(new common_1.ValidationPipe({ whitelist: true, transform: true }));
+    app.useGlobalPipes(new common_1.ValidationPipe({ whitelist: false, transform: true }));
     await app.listen(config.get('port', 3000));
 }
 void bootstrap();

@@ -21,13 +21,15 @@ const direccion_entity_1 = require("../entities/saf/direccion.entity");
 const servidor_publico_entity_1 = require("../entities/saf/servidor-publico.entity");
 const catalogos_controller_1 = require("./catalogos.controller");
 const catalogos_service_1 = require("./catalogos.service");
+const tipo_apoyo_entity_1 = require("../entities/doc/tipo-apoyo.entity");
+const docs_tipo_apoyo_entity_1 = require("../entities/doc/docs-tipo-apoyo.entity");
 let CatalogosModule = class CatalogosModule {
 };
 exports.CatalogosModule = CatalogosModule;
 exports.CatalogosModule = CatalogosModule = __decorate([
     (0, common_1.Module)({
         imports: [
-            typeorm_1.TypeOrmModule.forFeature([seccion_entity_1.Seccion, serie_entity_1.Serie, sub_serie_entity_1.SubSerie, subfondo_entity_1.Subfondo, catalogos_entity_1.TipoDoc, catalogos_entity_1.TipoAtencion]),
+            typeorm_1.TypeOrmModule.forFeature([seccion_entity_1.Seccion, serie_entity_1.Serie, sub_serie_entity_1.SubSerie, subfondo_entity_1.Subfondo, catalogos_entity_1.TipoDoc, catalogos_entity_1.TipoAtencion, tipo_apoyo_entity_1.TipoApoyo, docs_tipo_apoyo_entity_1.DocTipoApoyo]),
             typeorm_1.TypeOrmModule.forFeature([servidor_publico_entity_1.ServidorPublico, dependencia_entity_1.Dependencia, direccion_entity_1.Direccion, departamento_entity_1.Departamento], configuration_1.SAF_CONNECTION),
         ],
         controllers: [catalogos_controller_1.CatalogosController],

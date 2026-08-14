@@ -10,14 +10,23 @@ import {
   ResumenOficios,
 } from '../models';
 import { aHttpParams } from './http-params.util';
+import { Observable } from 'rxjs';
 
 export interface NuevoOficio {
+  folio?: string;
   titulo_doc: string;
   fojas?: number;
+  tipo_doc?: number;
   serie_id?: number;
   subserie_id?: number;
-  tipo_doc?: number;
+  tipo_apoyo_id?: number;
+  firmado: boolean;
+  file_doc: string;
   destinatarios: Array<{ rfc_atencion: string; tipo_atencion: string }>;
+}
+
+export type respuesta = {
+  hash: string
 }
 
 @Injectable({ providedIn: 'root' })
@@ -45,8 +54,8 @@ export class OficiosService {
     return this.http.get<OficioDetalle>(`${this.base}/${id}`);
   }
 
-  crear(oficio: NuevoOficio) {
-    return this.http.post<OficioDetalle>(this.base, oficio);
+  crear(formData: FormData) {
+    return this.http.post<OficioDetalle>(this.base, formData);
   }
 
   marcarVisto(atencionId: number) {
@@ -61,5 +70,25 @@ export class OficiosService {
       `${this.base}/atenciones/${atencionId}/atender`,
       {},
     );
+  }
+
+  validarPsw(psw: string): Observable<respuesta>{
+    return this.http.get<respuesta>(`${this.base}/validarPsw/${psw}`);
+  }
+
+  verPdf(id: number, tipo: number) {
+    return this.http.get(`${this.base}/verPdf/${id}/${tipo}`,
+      {
+        responseType: 'blob'
+      }
+    );
+  }
+
+  validarFirmado(id: number): Observable<boolean>{
+    return this.http.get<boolean>(`${this.base}/validarFirmado/${id}`);
+  }
+
+  firmadDoc(id: number, psw: string): Observable<number>{
+    return this.http.get<number>(`${this.base}/firmarDoc/${id}/${psw}`);
   }
 }
