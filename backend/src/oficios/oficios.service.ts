@@ -1024,8 +1024,10 @@ async firmarDocAcuse(id: number, psw: string, user:AuthenticatedUser){
             { id: destinatario.id },
             { visto: 1, fecha_visto: new Date() },
           );
+           return 1;
+        }else{
+          return 0;
         }
-      return 1;
     }
   }
 }
@@ -1041,7 +1043,7 @@ async firmarDocAcuse(id: number, psw: string, user:AuthenticatedUser){
             headers: {
               'Content-Type': 'application/json',
             },
-          },
+          }, 
         ),
       );
       return response.data;

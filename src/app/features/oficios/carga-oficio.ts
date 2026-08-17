@@ -153,10 +153,10 @@ export class CargaOficio implements OnInit {
   
 
   protected agregar(servidor: ServidorPublico): void {
-    if (this.destinatarios().some((d) => d.rfc === servidor.rfc)) {
-      this.avisos.advertencia('Ese destinatario ya está en la lista.');
-      return;
-    }
+    // if (this.destinatarios().some((d) => d.rfc === servidor.rfc)) {
+    //   this.avisos.advertencia('Ese destinatario ya está en la lista.');
+    //   return;
+    // }
 
     this.destinatarios.update((lista) => [...lista, { ...servidor, tipo_atencion: 'E' }]);
     this.resultados.set([]);
