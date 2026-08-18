@@ -1026,6 +1026,7 @@ async firmarDocAcuse(id: number, psw: string, user:AuthenticatedUser){
           );
            return 1;
         }else{
+          console.log('reteno de firma ', firma)
           return 0;
         }
     }
