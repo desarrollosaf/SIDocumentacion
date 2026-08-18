@@ -141,6 +141,7 @@ export class DetalleOficio implements OnInit {
           this.avisos.exito('Documento firmado correctamente.');
           return;     
         }else{
+          console.log(oficio)
           this.avisos.advertencia('El documento no se pudo firmar.');
           return;  
         }
