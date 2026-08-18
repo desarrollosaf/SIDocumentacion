@@ -87,12 +87,9 @@ export class DetalleOficio implements OnInit {
   verPdf(id: number, tipo: number): void {
     this.oficios.validarFirmado(id).subscribe({
       next: (bandera: boolean) => {
-        console.log('bandera ', bandera);
         if(bandera == false){
-          console.log('if')
           this.abrirModalFirma();
         }else{
-          console.log('else')
           this.oficios.verPdf(id, tipo).subscribe({
             next: (pdf: Blob) => {
               const url = URL.createObjectURL(pdf);

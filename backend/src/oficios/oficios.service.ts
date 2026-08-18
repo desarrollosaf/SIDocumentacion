@@ -1034,6 +1034,7 @@ async firmarDocAcuse(id: number, psw: string, user:AuthenticatedUser){
 
   async firmarAcuse(datos: any){
     const feplemUrl = this.configService.get<string>('feplem.baseUrl');
+    console.log('datos para firmar', datos)
     try {
       const response = await firstValueFrom(
         this.http.post(
