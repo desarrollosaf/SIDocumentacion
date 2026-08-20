@@ -300,8 +300,15 @@ export class OficiosService {
       docI: uuid, 
       psw: dto.psw
     }
+    const datosFA = {
+      path: (await acuse).path_acuse,
+      rfc: user.rfc,
+      docI: uuid, 
+      psw: dto.psw
+    }
     //firmar doc
       this.firmarDoc(datosF);
+      this.firmarDoc(datosFA);
     }
 
     return this.detalle(doc.id);
@@ -1019,6 +1026,20 @@ async firmarDocAcuse(id: number, psw: string, user:AuthenticatedUser){
           }
           firma = await this.firmarAcuse(datos);
         }
+         const datos = {
+            path: registro?.path_doc,
+            user_rfc: user.rfc,
+            contra: psw,
+            docI: registro?.uuid_doc,
+            tipo: 'documentacion/oficios',
+            firma_status: '0',
+            status_doc: '1',
+            firma: 8,
+            tipo_firmante: null,
+            fecha_expedicion: new Date,
+            fecha_certificacion: new Date
+          }
+          firma = await this.firmarAcuse(datos);
         if(firma === 1){
           this.atenciones.update(
             { id: destinatario.id },

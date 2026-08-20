@@ -192,7 +192,6 @@ export class CargaOficio implements OnInit {
       formData.append('file', this.archivoSeleccionado);
     }
 
-    console.log(' hash en formdata ', this.hash)
     formData.append('folio', valores.folio ?? '');
     formData.append('titulo_doc', valores.titulo_doc);
     formData.append('fojas', String(valores.fojas ?? ''));
@@ -207,7 +206,7 @@ export class CargaOficio implements OnInit {
       'destinatarios',
       JSON.stringify(this.destinatarios())
     );
-console.log('form ', formData);
+
     this.oficios.crear(formData).subscribe({
         next: (oficio) => {
           this.enviando.set(false);
