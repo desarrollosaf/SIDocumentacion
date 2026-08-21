@@ -11,7 +11,7 @@ export const routes: Routes = [
     path: 'login',
     canActivate: [invitadoGuard],
     loadComponent: () => import('./features/auth/login').then((m) => m.Login),
-    title: 'Iniciar sesión · SIDocumentación',
+    title: 'Iniciar sesión · SIGAPLEM',
   },
   {
     path: '',
@@ -23,7 +23,7 @@ export const routes: Routes = [
       {
         path: 'inicio',
         loadComponent: () => import('./features/inicio/inicio').then((m) => m.Inicio),
-        title: 'Inicio · SIDocumentación',
+        title: 'Inicio · SIGAPLEM',
       },
 
       // --- Oficios ---------------------------------------------------------
