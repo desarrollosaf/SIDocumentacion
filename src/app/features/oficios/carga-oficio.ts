@@ -166,9 +166,10 @@ export class CargaOficio implements OnInit {
     this.destinatarios.update((lista) => lista.filter((d) => d.rfc !== rfc));
   }
 
-  protected cambiarTipo(rfc: string, tipo: string): void {
+  protected cambiarTipo(index: number, tipo: string): void {
     this.destinatarios.update((lista) =>
-      lista.map((d) => (d.rfc === rfc ? { ...d, tipo_atencion: tipo } : d)),
+        lista.map((d, i) => 
+          (i === index ? { ...d, tipo_atencion: tipo } : d)),
     );
   }
 
@@ -191,7 +192,6 @@ export class CargaOficio implements OnInit {
     if (this.archivoSeleccionado) {
       formData.append('file', this.archivoSeleccionado);
     }
-
     formData.append('folio', valores.folio ?? '');
     formData.append('titulo_doc', valores.titulo_doc);
     formData.append('fojas', String(valores.fojas ?? ''));
@@ -206,7 +206,7 @@ export class CargaOficio implements OnInit {
       'destinatarios',
       JSON.stringify(this.destinatarios())
     );
-
+console.log('form ', formData);
     this.oficios.crear(formData).subscribe({
         next: (oficio) => {
           this.enviando.set(false);
