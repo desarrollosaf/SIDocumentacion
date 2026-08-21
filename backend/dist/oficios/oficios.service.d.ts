@@ -138,5 +138,6 @@ export declare class OficiosService {
         uuid_acuse: `${string}-${string}-${string}-${string}-${string}`;
     }>;
     verPdf(id: number, tipo: number): Promise<string>;
-    firmarDocAcuse(id: number, psw: string, user: AuthenticatedUser): Promise<true | undefined>;
+    firmarDocAcuse(id: number, psw: string, user: AuthenticatedUser): Promise<any>;
+    firmarAcuse(datos: any): Promise<any>;
 }

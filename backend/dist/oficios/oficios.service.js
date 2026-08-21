@@ -240,9 +240,18 @@ let OficiosService = class OficiosService {
                 path: pathPdf,
                 rfc: user.rfc,
                 docI: uuid,
-                psw: dto.psw
+                psw: dto.psw,
+                firma_status: 1,
+            };
+            const datosFA = {
+                path: (await acuse).path_acuse,
+                rfc: user.rfc,
+                docI: uuid,
+                psw: dto.psw,
+                firma_status: 0,
             };
             this.firmarDoc(datosF);
+            this.firmarDoc(datosFA);
         }
         return this.detalle(doc.id);
     }
@@ -515,7 +524,7 @@ let OficiosService = class OficiosService {
             contra: datosF.psw,
             docI: datosF.docI,
             tipo: 'documentacion/oficios',
-            firma_status: '1',
+            firma_status: datosF.firma_status,
             status_doc: '1',
             firma: 8,
             tipo_firmante: null,
@@ -647,10 +656,10 @@ let OficiosService = class OficiosService {
         });
         if (registro?.rfc_registro != user.rfc) {
             const destinatario = registro?.destinatarios?.find((d) => d.rfc_atencion === user.rfc);
-            console.log('destinatatios', destinatario);
             if (destinatario) {
                 const at = destinatario.tipo_atencion.split(',');
-                at.forEach(element => {
+                let firma;
+                for (const element of at) {
                     const datos = {
                         path: registro?.path_acuse,
                         user_rfc: user.rfc,
@@ -664,10 +673,46 @@ let OficiosService = class OficiosService {
                         fecha_expedicion: new Date,
                         fecha_certificacion: new Date
                     };
-                    console.log('datos ', datos);
-                });
-                return true;
+                    firma = await this.firmarAcuse(datos);
+                }
+                const datos = {
+                    path: registro?.path_doc,
+                    user_rfc: user.rfc,
+                    contra: psw,
+                    docI: registro?.uuid_doc,
+                    tipo: 'documentacion/oficios',
+                    firma_status: '0',
+                    status_doc: '1',
+                    firma: 8,
+                    tipo_firmante: null,
+                    fecha_expedicion: new Date,
+                    fecha_certificacion: new Date
+                };
+                firma = await this.firmarAcuse(datos);
+                if (firma === 1) {
+                    this.atenciones.update({ id: destinatario.id }, { visto: 1, fecha_visto: new Date() });
+                    return 1;
+                }
+                else {
+                    console.log('reteno de firma ', firma);
+                    return firma;
+                }
             }
+        }
+    }
+    async firmarAcuse(datos) {
+        const feplemUrl = this.configService.get('feplem.baseUrl');
+        console.log('datos para firmar', datos);
+        try {
+            const response = await (0, rxjs_1.firstValueFrom)(this.http.post(feplemUrl + '/api/firmaDocumentos', datos, {
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+            }));
+            return response.data;
+        }
+        catch (error) {
+            return error.response?.data;
         }
     }
 };

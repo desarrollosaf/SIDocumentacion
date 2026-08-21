@@ -186,7 +186,7 @@
           </div>
         } @else {
           <ul class="list-unstyled mb-0">
-            @for (destinatario of destinatarios(); track destinatario.rfc) {
+            @for (destinatario of destinatarios(); track destinatario.rfc; let i = $index) {
               <li class="border rounded p-2 mb-2">
                 <div class="d-flex justify-content-between align-items-start gap-2">
                   <div class="min-w-0">
@@ -210,7 +210,7 @@
                   [attr.aria-label]="'Papel de ' + destinatario.nombre + ' en el oficio'"
                   [ngModel]="destinatario.tipo_atencion"
                   [ngModelOptions]="{ standalone: true }"
-                  (ngModelChange)="cambiarTipo(destinatario.rfc, $event)"
+                  (ngModelChange)="cambiarTipo(i, $event)"
                 >
                   <option value="E">Elaboró</option>
                   <option value="R">Revisó</option>

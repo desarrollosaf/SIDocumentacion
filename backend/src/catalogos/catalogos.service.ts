@@ -154,7 +154,8 @@ export class CatalogosService {
     });
 
     return servidores
-      .filter((s) => s.N_Usuario && s.N_Usuario !== excluirRfc)
+      // .filter((s) => s.N_Usuario && s.N_Usuario !== excluirRfc)
+      .filter((s) => s.N_Usuario)
       .map((s) => ({
         rfc: s.N_Usuario,
         nombre: s.Nombre ?? 'Usuario no identificado',
