@@ -313,10 +313,11 @@ export class OficiosService {
       rfc: user.rfc,
       docI: uuid, 
       psw: dto.psw,
-      firma_status: 1,
-      tipo_firmante: null
-    }
-
+      firma_status: '1',
+      tipo_firmante: null,
+    } 
+    //firmar doc
+    this.firmarDoc(datosF);
 
     const regAt = await this.atenciones.findOne({
         where: {
@@ -339,8 +340,7 @@ export class OficiosService {
         this.firmarDoc(datosFA);
       }
     }
-    //firmar doc
-      this.firmarDoc(datosF);
+   
     }
 
     return this.detalle(doc.id);
