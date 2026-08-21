@@ -145,10 +145,13 @@
 
         <ul class="list-unstyled mb-0">
           @for (destinatario of oficio()!.destinatarios; track destinatario.id) {
+             @for (tipo of destinatario.tipo_atencion.split(','); track $index) {
             <li class="px-3 py-3 border-bottom">
               <div class="d-flex justify-content-between align-items-start gap-2">
                 <div class="min-w-0">
-                  <p class="mb-0 fw-semibold small text-truncate">  {{ etiquetaPapel(destinatario.tipo_atencion) }} {{ destinatario.nombre }}</p>
+                  <p class="mb-0 fw-semibold small text-truncate">
+                      {{ etiquetaPapel(tipo.trim()) }}
+                    {{ destinatario.nombre }}</p>
                   <p class="mb-0 text-muted-2" style="font-size: 0.75rem">
                     @if (destinatario.turnado_por) {
                       TURNO {{ destinatario.turnado_por }}
@@ -181,6 +184,7 @@
                 </p>
               }
             </li>
+          }
           }
         </ul>
       </section>

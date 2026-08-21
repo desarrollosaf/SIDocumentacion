@@ -186,17 +186,34 @@ let OficiosService = class OficiosService {
             created_at: new Date(),
             updated_at: new Date()
         }));
-        await this.atenciones.save(dto.destinatarios.map((destinatario) => this.atenciones.create({
-            id_registro_doc: doc.id,
-            rfc_atencion: destinatario.rfc,
-            tipo_atencion: destinatario.tipo_atencion,
-            rfc_turna: user.rfc,
-            visto: 0,
-            status_atencion: 0,
-            activo: 1,
-            created_at: new Date(),
-            updated_at: new Date()
-        })));
+        for (const destinatario of dto.destinatarios) {
+            const registroAtencion = await this.atenciones.findOne({
+                where: {
+                    rfc_atencion: destinatario.rfc,
+                    id_registro_doc: doc.id,
+                },
+            });
+            if (registroAtencion) {
+                console.log('entro ', destinatario.tipo_atencion);
+                registroAtencion.tipo_atencion = registroAtencion.tipo_atencion + ',' + destinatario.tipo_atencion;
+                registroAtencion.updated_at = new Date();
+                await this.atenciones.save(registroAtencion);
+            }
+            else {
+                const nuevaAtencion = this.atenciones.create({
+                    id_registro_doc: doc.id,
+                    rfc_atencion: destinatario.rfc,
+                    tipo_atencion: destinatario.tipo_atencion,
+                    rfc_turna: user.rfc,
+                    visto: 0,
+                    status_atencion: 0,
+                    activo: 1,
+                    created_at: new Date(),
+                    updated_at: new Date(),
+                });
+                await this.atenciones.save(nuevaAtencion);
+            }
+        }
         const nombreCarpeta = String(user.c_presup);
         const directorio = path.join(process.cwd(), 'storage', 'files', 'documentacion', 'oficios', nombreCarpeta);
         await fs_1.promises.mkdir(directorio, {
