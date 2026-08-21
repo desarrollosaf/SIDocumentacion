@@ -132,6 +132,7 @@ export class DetalleOficio implements OnInit {
 
 
   firmarDoc(id: number){
+    this.validarPsw();
     console.log('id del doc ', id)
     this.psw = this.formulario.get('psw')?.value ?? '';
     this.oficios.firmadDoc(id, this.psw).subscribe({
