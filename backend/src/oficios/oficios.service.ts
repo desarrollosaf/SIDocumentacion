@@ -298,13 +298,15 @@ export class OficiosService {
       path: pathPdf,
       rfc: user.rfc,
       docI: uuid, 
-      psw: dto.psw
+      psw: dto.psw,
+      firma_status: 1,
     }
     const datosFA = {
       path: (await acuse).path_acuse,
       rfc: user.rfc,
       docI: uuid, 
-      psw: dto.psw
+      psw: dto.psw,
+      firma_status: 0;
     }
     //firmar doc
       this.firmarDoc(datosF);
@@ -757,7 +759,7 @@ export class OficiosService {
       contra: datosF.psw,
       docI: datosF.docI,
       tipo: 'documentacion/oficios',
-      firma_status: '1',
+      firma_status: datosF.firma_status,
       status_doc: '1',
       firma: 8,
       tipo_firmante: null,
