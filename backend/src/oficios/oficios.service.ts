@@ -12,7 +12,7 @@ import { CrearOficioDto } from './dto/crear-oficio.dto';
 import { FiltroBandejaDto } from './dto/filtro-bandeja.dto';
 import { use } from 'passport';
 import { HttpService } from '@nestjs/axios';
-import { firstValueFrom } from 'rxjs';
+import { ConnectableObservable, firstValueFrom } from 'rxjs';
 import { promises as fs } from 'fs';
 import * as path from 'path';
 import { randomUUID } from 'crypto';
@@ -210,9 +210,22 @@ export class OficiosService {
       }),
     );
 
-    await this.atenciones.save(
-      dto.destinatarios.map((destinatario) =>
-        this.atenciones.create({
+    for (const destinatario of dto.destinatarios) {
+      const registroAtencion = await this.atenciones.findOne({
+        where: {
+          rfc_atencion: destinatario.rfc,
+          id_registro_doc: doc.id,
+        },
+      });
+
+      if (registroAtencion) {
+        // Ya existe → actualizar
+        registroAtencion.tipo_atencion = registroAtencion.tipo_atencion + ',' + destinatario.tipo_atencion;
+        registroAtencion.updated_at = new Date();
+        await this.atenciones.save(registroAtencion);
+      } else {
+        // No existe → crear
+        const nuevaAtencion = this.atenciones.create({
           id_registro_doc: doc.id,
           rfc_atencion: destinatario.rfc,
           tipo_atencion: destinatario.tipo_atencion,
@@ -221,10 +234,11 @@ export class OficiosService {
           status_atencion: 0,
           activo: 1,
           created_at: new Date(),
-          updated_at: new Date()
-        }),
-      ),
-    );
+          updated_at: new Date(),
+        });
+        await this.atenciones.save(nuevaAtencion);
+      }
+    }
 
     const nombreCarpeta = String(user.c_presup);
     const directorio = path.join(
@@ -300,17 +314,33 @@ export class OficiosService {
       docI: uuid, 
       psw: dto.psw,
       firma_status: 1,
+      tipo_firmante: null
     }
-    const datosFA = {
-      path: (await acuse).path_acuse,
-      rfc: user.rfc,
-      docI: uuid, 
-      psw: dto.psw,
-      firma_status: 0,
+
+
+    const regAt = await this.atenciones.findOne({
+        where: {
+          rfc_atencion: user.rfc,
+          id_registro_doc: doc.id,
+        },
+      });
+
+    if(regAt){
+      const tipos = regAt.tipo_atencion.split(',');
+      for (const tipo of tipos) {
+        const datosFA = {
+              path: (await acuse).path_acuse,
+              rfc: user.rfc,
+              docI: uuid, 
+              psw: dto.psw,
+              firma_status: 0,
+              tipo_firmante: tipo,
+            };
+        this.firmarDoc(datosFA);
+      }
     }
     //firmar doc
       this.firmarDoc(datosF);
-      this.firmarDoc(datosFA);
     }
 
     return this.detalle(doc.id);
@@ -762,7 +792,7 @@ export class OficiosService {
       firma_status: datosF.firma_status,
       status_doc: '1',
       firma: 8,
-      tipo_firmante: null,
+      tipo_firmante: datosF.tipo_firmante,
       fecha_expedicion: new Date()
         .toISOString()
         .slice(0, 19)
