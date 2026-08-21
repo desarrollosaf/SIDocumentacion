@@ -1042,6 +1042,7 @@ async firmarDocAcuse(id: number, psw: string, user:AuthenticatedUser){
     if(destinatario){
       const at = destinatario.tipo_atencion.split(',');
       let firma;
+      let firmaA;
       for (const element of at) {
           const datos = {
             path: registro?.path_acuse,
@@ -1056,7 +1057,7 @@ async firmarDocAcuse(id: number, psw: string, user:AuthenticatedUser){
             fecha_expedicion: new Date,
             fecha_certificacion: new Date
           }
-          firma = await this.firmarAcuse(datos);
+          firmaA = await this.firmarAcuse(datos);
         }
          const datos = {
             path: registro?.path_doc,
@@ -1064,7 +1065,7 @@ async firmarDocAcuse(id: number, psw: string, user:AuthenticatedUser){
             contra: psw,
             docI: registro?.uuid_doc,
             tipo: 'documentacion/oficios',
-            firma_status: '0',
+            firma_status: '1',
             status_doc: '1',
             firma: 8,
             tipo_firmante: null,
