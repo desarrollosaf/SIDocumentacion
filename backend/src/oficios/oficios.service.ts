@@ -306,7 +306,7 @@ export class OficiosService {
       rfc: user.rfc,
       docI: uuid, 
       psw: dto.psw,
-      firma_status: 0;
+      firma_status: 0,
     }
     //firmar doc
       this.firmarDoc(datosF);
