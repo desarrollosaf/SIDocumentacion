@@ -12,12 +12,13 @@ import { SubSerie } from '../entities/doc/sub-serie.entity';
 import { Subfondo } from '../entities/doc/subfondo.entity';
 import { TipoApoyo } from '../entities/doc/tipo-apoyo.entity';
 import { DocTipoApoyo } from '../entities/doc/docs-tipo-apoyo.entity';
+import { Expedientes } from '../entities/doc/expedientes.entity';
 import { Departamento } from '../entities/saf/departamento.entity';
 import { Dependencia } from '../entities/saf/dependencia.entity';
 import { Direccion } from '../entities/saf/direccion.entity';
 import { ServidorPublico } from '../entities/saf/servidor-publico.entity';
 import { User } from '../entities/saf/user.entity';
-export declare const DOC_ENTITIES: (typeof Agenda | typeof Role | typeof ModelHasRole | typeof TipoDoc | typeof TipoAtencion | typeof Subfondo | typeof SubSerie | typeof Serie | typeof Seccion | typeof DocTipoApoyo | typeof TipoApoyo | typeof RegistroDoc | typeof AtencionDoc | typeof FirmaDoc | typeof Registro | typeof RegistroAtencion)[];
+export declare const DOC_ENTITIES: (typeof Agenda | typeof Role | typeof ModelHasRole | typeof TipoDoc | typeof TipoAtencion | typeof Subfondo | typeof SubSerie | typeof Serie | typeof Seccion | typeof DocTipoApoyo | typeof TipoApoyo | typeof RegistroDoc | typeof AtencionDoc | typeof FirmaDoc | typeof Registro | typeof RegistroAtencion | typeof Expedientes)[];
 export declare const SAF_ENTITIES: (typeof Dependencia | typeof Direccion | typeof Departamento | typeof ServidorPublico | typeof User)[];
 export declare class DatabaseModule {
 }

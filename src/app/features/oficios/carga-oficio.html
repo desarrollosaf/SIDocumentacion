@@ -127,6 +127,7 @@
                 class="form-select"
                 formControlName="subserie_id"
                 [disabled]="!subseries().length"
+                (change)="getExp($any($event.target).value, 2)"
               >
                 <option [ngValue]="null">
                   {{ subseries().length ? 'Selecciona…' : 'Elige primero una serie' }}
@@ -134,6 +135,17 @@
                 @for (sub of subseries(); track sub.id) {
                   <option [ngValue]="sub.id">{{ sub.nombre }}</option>
                 }
+              </select>
+            </div>
+            <div class="col-12 col-md-6">
+              <label for="serie" class="form-label">Expediente <span class="text-danger">*</span></label>
+              <select id="expediente_id" class="form-select" formControlName="expediente_id">
+                <option value="">Selecciona un expediente</option>
+                  @for (expediente of expedientesArray(); track expediente.id) {
+                    <option [value]="expediente.id">
+                      {{ expediente.tipo }}
+                    </option>
+                  }
               </select>
             </div>
           </div>

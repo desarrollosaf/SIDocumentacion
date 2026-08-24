@@ -46,6 +46,9 @@ let OficiosController = class OficiosController {
         const ruta = await this.oficios.verPdf(id, tipo);
         return res.sendFile(ruta);
     }
+    async getExp(id) {
+        return this.oficios.getExp(id);
+    }
     async firmarDoc(id, psw, user) {
         return this.oficios.firmarDocAcuse(id, psw, user);
     }
@@ -118,6 +121,13 @@ __decorate([
     __metadata("design:paramtypes", [Number, Number, Object]),
     __metadata("design:returntype", Promise)
 ], OficiosController.prototype, "verPdf", null);
+__decorate([
+    (0, common_1.Get)('getExp/:id'),
+    __param(0, (0, common_1.Param)('id', common_1.ParseIntPipe)),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Number]),
+    __metadata("design:returntype", Promise)
+], OficiosController.prototype, "getExp", null);
 __decorate([
     (0, common_1.Get)('firmarDoc/:id/:psw'),
     __param(0, (0, common_1.Param)('id', common_1.ParseIntPipe)),
