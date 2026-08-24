@@ -127,7 +127,7 @@
                 class="form-select"
                 formControlName="subserie_id"
                 [disabled]="!subseries().length"
-                (change)="getExp($any($event.target).value, 2)"
+                (change)="getExp(formulario.get('subserie_id')?.value, 2)"
               >
                 <option [ngValue]="null">
                   {{ subseries().length ? 'Selecciona…' : 'Elige primero una serie' }}

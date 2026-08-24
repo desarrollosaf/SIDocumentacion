@@ -235,7 +235,7 @@ export class CargaOficio implements OnInit {
       });
   }
 
-  getExp(idS: number, tipo: number){
+  getExp(idS: any, tipo: number){
     this.oficios.getExp(idS, tipo).subscribe((oficio) => {
       this.expedientesArray.set(oficio);
     });

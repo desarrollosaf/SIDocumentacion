@@ -142,7 +142,7 @@ export declare class OficiosService {
     verPdf(id: number, tipo: number): Promise<string>;
     firmarDocAcuse(id: number, psw: string, user: AuthenticatedUser): Promise<any>;
     firmarAcuse(datos: any): Promise<any>;
-    getExp(id: number): Promise<{
+    getExp(id: number, tipo: number): Promise<{
         id: number;
         tipo: string;
     }[]>;

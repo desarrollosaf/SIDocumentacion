@@ -54,7 +54,7 @@ export declare class OficiosController {
     validarPsw(user: AuthenticatedUser, psw: string): Promise<any>;
     validarFirmado(user: AuthenticatedUser, id: number): Promise<boolean>;
     verPdf(id: number, tipo: number, res: Response): Promise<void>;
-    getExp(id: number): Promise<{
+    getExp(id: number, tipo: number): Promise<{
         id: number;
         tipo: string;
     }[]>;

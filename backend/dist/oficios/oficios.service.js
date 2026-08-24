@@ -748,13 +748,24 @@ let OficiosService = class OficiosService {
             return error.response?.data;
         }
     }
-    async getExp(id) {
-        const exp = await this.expediemtes.find({
-            where: {
-                id_serie: id,
-                fecha_cierre_exp: (0, typeorm_2.IsNull)()
-            }
-        });
+    async getExp(id, tipo) {
+        let exp;
+        if (tipo == 1) {
+            exp = await this.expediemtes.find({
+                where: {
+                    id_serie: id,
+                    fecha_cierre_exp: (0, typeorm_2.IsNull)()
+                }
+            });
+        }
+        else {
+            exp = await this.expediemtes.find({
+                where: {
+                    id_subserie: id,
+                    fecha_cierre_exp: (0, typeorm_2.IsNull)()
+                }
+            });
+        }
         return exp.map((row) => ({
             id: row.id,
             tipo: row.nombre_ex + ' ' + row.anio
