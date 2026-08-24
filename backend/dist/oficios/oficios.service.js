@@ -62,13 +62,16 @@ const crypto_1 = require("crypto");
 const pdf_lib_1 = require("pdf-lib");
 const qrcode = __importStar(require("qrcode"));
 const config_1 = require("@nestjs/config");
+const expedientes_entity_1 = require("../entities/doc/expedientes.entity");
 let OficiosService = class OficiosService {
+    expediemtes;
     registros;
     atenciones;
     servidores;
     http;
     configService;
-    constructor(registros, atenciones, servidores, http, configService) {
+    constructor(expediemtes, registros, atenciones, servidores, http, configService) {
+        this.expediemtes = expediemtes;
         this.registros = registros;
         this.atenciones = atenciones;
         this.servidores = servidores;
@@ -194,7 +197,6 @@ let OficiosService = class OficiosService {
                 },
             });
             if (registroAtencion) {
-                console.log('entro ', destinatario.tipo_atencion);
                 registroAtencion.tipo_atencion = registroAtencion.tipo_atencion + ',' + destinatario.tipo_atencion;
                 registroAtencion.updated_at = new Date();
                 await this.atenciones.save(registroAtencion);
@@ -258,17 +260,30 @@ let OficiosService = class OficiosService {
                 rfc: user.rfc,
                 docI: uuid,
                 psw: dto.psw,
-                firma_status: 1,
-            };
-            const datosFA = {
-                path: (await acuse).path_acuse,
-                rfc: user.rfc,
-                docI: uuid,
-                psw: dto.psw,
-                firma_status: 0,
+                firma_status: '1',
+                tipo_firmante: null,
             };
             this.firmarDoc(datosF);
-            this.firmarDoc(datosFA);
+            const regAt = await this.atenciones.findOne({
+                where: {
+                    rfc_atencion: user.rfc,
+                    id_registro_doc: doc.id,
+                },
+            });
+            if (regAt) {
+                const tipos = regAt.tipo_atencion.split(',');
+                for (const tipo of tipos) {
+                    const datosFA = {
+                        path: (await acuse).path_acuse,
+                        rfc: user.rfc,
+                        docI: uuid,
+                        psw: dto.psw,
+                        firma_status: 0,
+                        tipo_firmante: tipo,
+                    };
+                    this.firmarDoc(datosFA);
+                }
+            }
         }
         return this.detalle(doc.id);
     }
@@ -544,7 +559,7 @@ let OficiosService = class OficiosService {
             firma_status: datosF.firma_status,
             status_doc: '1',
             firma: 8,
-            tipo_firmante: null,
+            tipo_firmante: datosF.tipo_firmante,
             fecha_expedicion: new Date()
                 .toISOString()
                 .slice(0, 19)
@@ -676,6 +691,7 @@ let OficiosService = class OficiosService {
             if (destinatario) {
                 const at = destinatario.tipo_atencion.split(',');
                 let firma;
+                let firmaA;
                 for (const element of at) {
                     const datos = {
                         path: registro?.path_acuse,
@@ -690,7 +706,7 @@ let OficiosService = class OficiosService {
                         fecha_expedicion: new Date,
                         fecha_certificacion: new Date
                     };
-                    firma = await this.firmarAcuse(datos);
+                    firmaA = await this.firmarAcuse(datos);
                 }
                 const datos = {
                     path: registro?.path_doc,
@@ -698,7 +714,7 @@ let OficiosService = class OficiosService {
                     contra: psw,
                     docI: registro?.uuid_doc,
                     tipo: 'documentacion/oficios',
-                    firma_status: '0',
+                    firma_status: '1',
                     status_doc: '1',
                     firma: 8,
                     tipo_firmante: null,
@@ -732,14 +748,39 @@ let OficiosService = class OficiosService {
             return error.response?.data;
         }
     }
+    async getExp(id, tipo) {
+        let exp;
+        if (tipo == 1) {
+            exp = await this.expediemtes.find({
+                where: {
+                    id_serie: id,
+                    fecha_cierre_exp: (0, typeorm_2.IsNull)()
+                }
+            });
+        }
+        else {
+            exp = await this.expediemtes.find({
+                where: {
+                    id_subserie: id,
+                    fecha_cierre_exp: (0, typeorm_2.IsNull)()
+                }
+            });
+        }
+        return exp.map((row) => ({
+            id: row.id,
+            tipo: row.nombre_ex + ' ' + row.anio
+        }));
+    }
 };
 exports.OficiosService = OficiosService;
 exports.OficiosService = OficiosService = __decorate([
     (0, common_1.Injectable)(),
-    __param(0, (0, typeorm_1.InjectRepository)(registro_doc_entity_1.RegistroDoc)),
-    __param(1, (0, typeorm_1.InjectRepository)(atencion_doc_entity_1.AtencionDoc)),
-    __param(2, (0, typeorm_1.InjectRepository)(servidor_publico_entity_1.ServidorPublico, configuration_1.SAF_CONNECTION)),
+    __param(0, (0, typeorm_1.InjectRepository)(expedientes_entity_1.Expedientes)),
+    __param(1, (0, typeorm_1.InjectRepository)(registro_doc_entity_1.RegistroDoc)),
+    __param(2, (0, typeorm_1.InjectRepository)(atencion_doc_entity_1.AtencionDoc)),
+    __param(3, (0, typeorm_1.InjectRepository)(servidor_publico_entity_1.ServidorPublico, configuration_1.SAF_CONNECTION)),
     __metadata("design:paramtypes", [typeorm_2.Repository,
+        typeorm_2.Repository,
         typeorm_2.Repository,
         typeorm_2.Repository,
         axios_1.HttpService,

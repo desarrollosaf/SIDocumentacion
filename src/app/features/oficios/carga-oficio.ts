@@ -42,6 +42,7 @@ export class CargaOficio implements OnInit {
   protected readonly enviando = signal(false);
 
   private readonly termino$ = new Subject<string>();
+ protected readonly expedientesArray = signal<Select[]>([]);
 
   archivo?: File;
   archivoUrl?: SafeResourceUrl;
@@ -61,7 +62,8 @@ export class CargaOficio implements OnInit {
     opcion_id: null as  number | null,
     firmar_doc: false,
     psw: [{ value: '', disabled: true }],
-    file_path: ['', [Validators.required]]
+    file_path: ['', [Validators.required]],
+    expediente_id: null as  number | null,
   });
 
   constructor(
@@ -88,7 +90,6 @@ export class CargaOficio implements OnInit {
     this.catalogos.tiposDocumento().subscribe((tipos) => this.tiposDocumento.set(tipos));
     this.catalogos.miClasificacion().subscribe((series) => this.clasificacion.set(series));
     this.catalogos.tiposApoyo().subscribe((tiposApoyo) => this.tiposApoyo.set(tiposApoyo));
-    
     this.formulario.controls.tipo_apoyo.valueChanges.subscribe((tipoApoyo) => {
       const serie = this.formulario.controls.serie_id;
       if (tipoApoyo === false) {
@@ -141,6 +142,7 @@ export class CargaOficio implements OnInit {
 
     const serie = this.clasificacion().find((s) => s.id === id);
     this.subseries.set(serie?.subseries ?? []);
+    this.getExp(Number(serieId), 1);
   }
 
   protected alCambiarApoyo(apoyoId: string): void {
@@ -202,11 +204,11 @@ export class CargaOficio implements OnInit {
     formData.append('firmado', String(valores.firmar_doc ?? false));
     formData.append('hash', String(this.hash ?? ''));
     formData.append('psw', String(this.psw));
+    formData.append('expediente_id', String(valores.expediente_id ?? ''));
     formData.append(
       'destinatarios',
       JSON.stringify(this.destinatarios())
     );
-console.log('form ', formData);
     this.oficios.crear(formData).subscribe({
         next: (oficio) => {
           this.enviando.set(false);
@@ -231,6 +233,12 @@ console.log('form ', formData);
         },
         error: () => this.enviando.set(false),
       });
+  }
+
+  getExp(idS: any, tipo: number){
+    this.oficios.getExp(idS, tipo).subscribe((oficio) => {
+      this.expedientesArray.set(oficio);
+    });
   }
 
 }

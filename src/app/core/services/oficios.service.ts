@@ -29,6 +29,11 @@ export type respuesta = {
   hash: string
 }
 
+export type select = Array<{
+  id: number;
+  tipo: string;
+}>
+
 @Injectable({ providedIn: 'root' })
 export class OficiosService {
   private readonly http = inject(HttpClient);
@@ -74,6 +79,10 @@ export class OficiosService {
 
   validarPsw(psw: string): Observable<respuesta>{
     return this.http.get<respuesta>(`${this.base}/validarPsw/${psw}`);
+  }
+
+  getExp(idS: number, tipo: number): Observable<select>{
+    return this.http.get<select>(`${this.base}/getExp/${idS}/${tipo}`);
   }
 
   verPdf(id: number, tipo: number) {

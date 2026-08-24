@@ -1,6 +1,6 @@
 import { Injectable, NotFoundException, Res } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { In, Repository } from 'typeorm';
+import { In, IsNull, Repository } from 'typeorm';
 
 import { SAF_CONNECTION } from '../config/configuration';
 import { Paginated, paginate } from '../common/dto/pagination.dto';
@@ -21,6 +21,7 @@ import * as qrcode from 'qrcode';
 import { UUID } from 'typeorm/driver/mongodb/bson.typings.js';
 import { ConfigService } from '@nestjs/config';
 import { text } from 'stream/consumers';
+import { Expedientes } from '../entities/doc/expedientes.entity';
 
 
 export interface OficioBandeja {
@@ -43,6 +44,8 @@ export interface OficioBandeja {
 @Injectable()
 export class OficiosService {
   constructor(
+    @InjectRepository(Expedientes)
+    private readonly expediemtes: Repository<Expedientes>,
     @InjectRepository(RegistroDoc)
     private readonly registros: Repository<RegistroDoc>,
     @InjectRepository(AtencionDoc)
@@ -1106,6 +1109,31 @@ async firmarDocAcuse(id: number, psw: string, user:AuthenticatedUser){
     } catch (error: any) {
       return error.response?.data;
     } 
+  }
+
+  async getExp(id: number, tipo: number){
+    let exp;
+    if(tipo == 1){
+      exp = await this.expediemtes.find({
+        where:{
+          id_serie: id,
+          fecha_cierre_exp: IsNull()
+        }
+      })
+    }else{
+      exp = await this.expediemtes.find({
+        where:{
+          id_subserie: id,
+          fecha_cierre_exp: IsNull()
+        }
+      })
+    }
+    
+
+    return  exp.map((row) => ({
+      id: row.id,
+      tipo: row.nombre_ex+' '+ row.anio
+   }));
   }
 }
 

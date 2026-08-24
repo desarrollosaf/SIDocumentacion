@@ -17,6 +17,7 @@ import { SubSerie } from '../entities/doc/sub-serie.entity';
 import { Subfondo } from '../entities/doc/subfondo.entity';
 import { TipoApoyo } from '../entities/doc/tipo-apoyo.entity';
 import { DocTipoApoyo } from '../entities/doc/docs-tipo-apoyo.entity';
+import { Expedientes } from '../entities/doc/expedientes.entity';
 
 import { Departamento } from '../entities/saf/departamento.entity';
 import { Dependencia } from '../entities/saf/dependencia.entity';
@@ -42,6 +43,7 @@ export const DOC_ENTITIES = [
   TipoDoc,
   TipoApoyo,
   DocTipoApoyo,
+  Expedientes
 ];
 
 /** Entidades de la base institucional SAF. */

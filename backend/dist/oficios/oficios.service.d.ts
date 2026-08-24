@@ -8,6 +8,7 @@ import { CrearOficioDto } from './dto/crear-oficio.dto';
 import { FiltroBandejaDto } from './dto/filtro-bandeja.dto';
 import { HttpService } from '@nestjs/axios';
 import { ConfigService } from '@nestjs/config';
+import { Expedientes } from '../entities/doc/expedientes.entity';
 export interface OficioBandeja {
     id: number;
     atencion_id: number | null;
@@ -24,12 +25,13 @@ export interface OficioBandeja {
     contraparte: string;
 }
 export declare class OficiosService {
+    private readonly expediemtes;
     private readonly registros;
     private readonly atenciones;
     private readonly servidores;
     private readonly http;
     private readonly configService;
-    constructor(registros: Repository<RegistroDoc>, atenciones: Repository<AtencionDoc>, servidores: Repository<ServidorPublico>, http: HttpService, configService: ConfigService);
+    constructor(expediemtes: Repository<Expedientes>, registros: Repository<RegistroDoc>, atenciones: Repository<AtencionDoc>, servidores: Repository<ServidorPublico>, http: HttpService, configService: ConfigService);
     bandejaEntrada(user: AuthenticatedUser, filtro: FiltroBandejaDto): Promise<Paginated<OficioBandeja>>;
     bandejaSalida(user: AuthenticatedUser, filtro: FiltroBandejaDto): Promise<Paginated<OficioBandeja>>;
     detalle(id: number): Promise<{
@@ -140,4 +142,8 @@ export declare class OficiosService {
     verPdf(id: number, tipo: number): Promise<string>;
     firmarDocAcuse(id: number, psw: string, user: AuthenticatedUser): Promise<any>;
     firmarAcuse(datos: any): Promise<any>;
+    getExp(id: number, tipo: number): Promise<{
+        id: number;
+        tipo: string;
+    }[]>;
 }

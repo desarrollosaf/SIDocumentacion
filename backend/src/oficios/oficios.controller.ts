@@ -66,6 +66,14 @@ export class OficiosController {
     return res.sendFile(ruta);
   }
 
+  @Get('getExp/:id/:tipo')
+  async getExp(
+     @Param('id', ParseIntPipe) id: number,
+     @Param('tipo', ParseIntPipe) tipo: number
+  ){
+    return this.oficios.getExp(id, tipo);
+  }
+
   @Get('firmarDoc/:id/:psw')
   async firmarDoc(
     @Param('id', ParseIntPipe) id: number, 
