@@ -18,7 +18,7 @@ import { Dependencia } from '../entities/saf/dependencia.entity';
 import { Direccion } from '../entities/saf/direccion.entity';
 import { ServidorPublico } from '../entities/saf/servidor-publico.entity';
 import { User } from '../entities/saf/user.entity';
-export declare const DOC_ENTITIES: (typeof Agenda | typeof Role | typeof ModelHasRole | typeof TipoDoc | typeof TipoAtencion | typeof Subfondo | typeof SubSerie | typeof Serie | typeof Seccion | typeof DocTipoApoyo | typeof TipoApoyo | typeof RegistroDoc | typeof AtencionDoc | typeof FirmaDoc | typeof Registro | typeof RegistroAtencion | typeof Expedientes)[];
-export declare const SAF_ENTITIES: (typeof Dependencia | typeof Direccion | typeof Departamento | typeof ServidorPublico | typeof User)[];
+export declare const DOC_ENTITIES: (typeof Expedientes | typeof Agenda | typeof AtencionDoc | typeof FirmaDoc | typeof ModelHasRole | typeof Registro | typeof RegistroAtencion | typeof RegistroDoc | typeof Role | typeof Seccion | typeof Serie | typeof SubSerie | typeof Subfondo | typeof TipoAtencion | typeof TipoDoc | typeof TipoApoyo | typeof DocTipoApoyo)[];
+export declare const SAF_ENTITIES: (typeof Departamento | typeof Dependencia | typeof Direccion | typeof ServidorPublico | typeof User)[];
 export declare class DatabaseModule {
 }
