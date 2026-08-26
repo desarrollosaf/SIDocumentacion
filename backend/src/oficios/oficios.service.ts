@@ -228,13 +228,30 @@ export class OficiosService {
         await this.atenciones.save(registroAtencion);
       } else {
         // No existe → crear
+         var visto;
+          var status_atencion;
+          var fecha_visto;
+          var fecha_atencion;
+        if(doc.rfc_registro == destinatario.rfc){
+          visto = 1;
+          status_atencion = 1;
+          fecha_visto = new Date;
+          fecha_atencion = new Date;
+        }else{
+          visto = 0;
+          status_atencion = 0;
+          fecha_visto = null;
+          fecha_atencion = null;
+        }
         const nuevaAtencion = this.atenciones.create({
           id_registro_doc: doc.id,
           rfc_atencion: destinatario.rfc,
           tipo_atencion: destinatario.tipo_atencion,
           rfc_turna: user.rfc,
-          visto: 0,
-          status_atencion: 0,
+          visto: visto,
+          status_atencion: status_atencion,
+          fecha_visto: fecha_visto,
+          fecha_atencion: fecha_atencion,
           activo: 1,
           created_at: new Date(),
           updated_at: new Date(),
