@@ -57,8 +57,12 @@ export class DetalleOficio implements OnInit {
     }
 
     this.oficios.atender(atencion.id).subscribe(({ message }) => {
-      this.avisos.exito(message);
-      this.cargar(this.oficio()!.id);
+      if(message == 'No'){
+        this.abrirModalFirma();
+      }else{
+        this.avisos.exito(message);
+        this.cargar(this.oficio()!.id);
+      }
     });
   }
 

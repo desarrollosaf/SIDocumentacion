@@ -364,14 +364,18 @@ export class OficiosService {
   async atender(user: AuthenticatedUser, atencionId: number) {
     const atencion = await this.atencionPropia(user, atencionId);
 
-    await this.atenciones.update(atencion.id, {
-      status_atencion: 1,
-      fecha_atencion: new Date(),
-      visto: 1,
-      fecha_visto: atencion.fecha_visto ?? new Date(),
-    });
+    if(atencion.visto == 0){
+      return { message: 'No' };
+    }else{
+      await this.atenciones.update(atencion.id, {
+        status_atencion: 1,
+        fecha_atencion: new Date(),
+        visto: 1,
+        fecha_visto: atencion.fecha_visto ?? new Date(),
+      });
 
-    return { message: 'El oficio se marcó como atendido.' };
+      return { message: 'El oficio se marcó como atendido.' };
+    }
   }
 
   async validarPsw(user: AuthenticatedUser, psw: string){
