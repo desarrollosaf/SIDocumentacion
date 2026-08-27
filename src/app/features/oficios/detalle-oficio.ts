@@ -37,6 +37,7 @@ export class DetalleOficio implements OnInit {
       psw:  ['', [Validators.required]],
   });
 
+  protected readonly mostrarPassword = signal(false);
   psw?: string | '';
 
   ngOnInit(): void {
@@ -152,6 +153,9 @@ export class DetalleOficio implements OnInit {
         }
       }
     })
+  }
 
+  protected alternarPassword(): void {
+    this.mostrarPassword.update((visible) => !visible);
   }
 }

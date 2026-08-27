@@ -270,7 +270,15 @@
          
             <div class="col-6 col-md-4">
               <label for="firmar_doc" class="form-label">Contraseña certificado <span class="text-danger">*</span></label>
-              <input type="password" class="form-control" id="psw" formControlName="psw" placeholder="Contraseña" (blur)="validarPsw()">
+              <div class="input-group">
+                <input [type]="mostrarPassword() ? 'text' : 'password'" class="form-control" id="psw" formControlName="psw" placeholder="Contraseña" (blur)="validarPsw()">
+                <button type="button" class="btn btn-outline-secondary" 
+                [attr.aria-label]="mostrarPassword() ? 'Ocultar contraseña' : 'Mostrar contraseña'"
+                  (click)="alternarPassword()"
+                >
+                  <i class="bi" [class]="mostrarPassword() ? 'bi-eye-slash' : 'bi-eye'"></i>
+                </button>
+              </div>
             </div>
           </div>
 
