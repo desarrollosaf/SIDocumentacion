@@ -41,6 +41,8 @@ export class CargaOficio implements OnInit {
   protected readonly buscando = signal(false);
   protected readonly enviando = signal(false);
 
+  protected readonly mostrarPassword = signal(false);
+
   private readonly termino$ = new Subject<string>();
  protected readonly expedientesArray = signal<Select[]>([]);
 
@@ -239,6 +241,10 @@ export class CargaOficio implements OnInit {
     this.oficios.getExp(idS, tipo).subscribe((oficio) => {
       this.expedientesArray.set(oficio);
     });
+  }
+
+  protected alternarPassword(): void {
+    this.mostrarPassword.update((visible) => !visible);
   }
 
 }

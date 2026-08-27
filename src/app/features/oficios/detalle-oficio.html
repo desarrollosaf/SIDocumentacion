@@ -96,7 +96,15 @@
 
                           <div class="modal-body">
                             <label class="form-label"> Para firmar electrónicamente el documento, ingrese la contraseña de la FEAPLEM.</label>
-                            <input type="password" class="form-control" id="psw" formControlName="psw" placeholder="Contraseña" (blur)="validarPsw()">
+                            <div class="input-group">
+                              <input [type]="mostrarPassword() ? 'text' : 'password'" class="form-control" id="psw" formControlName="psw" placeholder="Contraseña" (blur)="validarPsw()">
+                              <button type="button" class="btn btn-outline-secondary" 
+                              [attr.aria-label]="mostrarPassword() ? 'Ocultar contraseña' : 'Mostrar contraseña'"
+                                (click)="alternarPassword()"
+                              >
+                                <i class="bi" [class]="mostrarPassword() ? 'bi-eye-slash' : 'bi-eye'"></i>
+                              </button>
+                            </div>
                           </div>
                           <br>
 
