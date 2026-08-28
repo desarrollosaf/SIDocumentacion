@@ -50,7 +50,7 @@ export class CargaOficio implements OnInit {
   archivoUrl?: SafeResourceUrl;
   archivoSeleccionado?: File;
   hash?: string;
-  psw?: string;
+  psw: string = '' ;
 
   protected readonly formulario = this.fb.nonNullable.group({
     folio: [''],
@@ -177,7 +177,13 @@ export class CargaOficio implements OnInit {
     );
   }
 
-  protected enviar(): void {
+  async enviar() {
+    const valido = await this.validarPsw();
+    console.log('regresa validacion ', valido)
+    if (!valido) {
+      return; 
+    }
+    
     if (this.formulario.invalid) {
       this.formulario.markAllAsTouched();
       return;
@@ -221,19 +227,25 @@ export class CargaOficio implements OnInit {
       });
   }
 
-  validarPsw(){
+  async validarPsw(): Promise<boolean>{
     this.psw = this.formulario.get('psw')?.value ?? '';
-    this.oficios.validarPsw(this.psw).subscribe({
-        next: (oficio) => {
-          if(oficio.hash == '0'){
-            this.avisos.advertencia(`La contraseña no es valida o el certificado no esta vigente.`);
-            this.formulario.get('psw')?.reset();
-            return;
-          }else{
-            this.hash = oficio.hash;
-          }
-        },
-        error: () => this.enviando.set(false),
+    return new Promise((resolve) => {
+      this.oficios.validarPsw(this.psw).subscribe({
+          next: (oficio) => {
+            if(oficio.hash == '0'){
+              this.avisos.advertencia(`La contraseña no es valida o el certificado no esta vigente.`);
+              this.formulario.get('psw')?.reset();
+              resolve(false);
+            }else{
+              this.hash = oficio.hash;
+              resolve(true);
+            }
+          },
+          error: () => {
+            this.enviando.set(false);
+            resolve(false);
+          } 
+        });
       });
   }
 
