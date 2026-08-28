@@ -179,7 +179,6 @@ export class CargaOficio implements OnInit {
 
   async enviar() {
     const valido = await this.validarPsw();
-    console.log('regresa validacion ', valido)
     if (!valido) {
       return; 
     }
