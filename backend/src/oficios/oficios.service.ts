@@ -1156,5 +1156,28 @@ async firmarDocAcuse(id: number, psw: string, user:AuthenticatedUser){
       tipo: row.nombre_ex+' '+ row.anio
    }));
   }
+
+  async eliminarRegistro(id: number){
+    const registro = await this.registros.findOne({
+      where: {
+        id: id
+      }, 
+      relations:{
+        destinatarios: true
+      }
+    });
+    if (!registro) {
+      throw new NotFoundException('Registro no encontrado');
+      return false;
+    }
+
+    if (registro.destinatarios?.length) {
+      await this.atenciones.remove(registro.destinatarios);
+    }
+
+    await this.registros.remove(registro);
+    return true;
+
+  }
 }
 

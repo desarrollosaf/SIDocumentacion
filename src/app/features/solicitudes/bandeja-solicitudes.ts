@@ -67,6 +67,7 @@ export class BandejaSolicitudes implements OnInit {
   protected readonly cargando = signal(true);
   protected readonly filtro = signal<FiltroBandeja>({ page: 1, perPage: 10 });
 
+
   ngOnInit(): void {
     // La ruta se reutiliza para las cinco vistas; se relee en cada navegación.
     this.ruta.data.subscribe((data) => {
@@ -173,4 +174,5 @@ export class BandejaSolicitudes implements OnInit {
         return 'todos';
     }
   }
+
 }

@@ -66,6 +66,11 @@ export class OficiosController {
     return res.sendFile(ruta);
   }
 
+  @Get('eliminarRegistro/:id')
+    eliminarRegistro(@Param('id', ParseIntPipe) id: number){
+     return this.oficios.eliminarRegistro(id);
+  }
+
   @Get('getExp/:id/:tipo')
   async getExp(
      @Param('id', ParseIntPipe) id: number,
