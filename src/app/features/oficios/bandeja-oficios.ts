@@ -39,6 +39,8 @@ export class BandejaOficios implements OnInit {
   protected readonly pagina = signal<Paginado<OficioBandeja> | null>(null);
   protected readonly cargando = signal(true);
 
+  protected modalEliminarAbierto = signal(false);
+
   protected readonly filtro = signal<FiltroBandeja>({
     page: 1,
     perPage: 10,
@@ -53,7 +55,6 @@ export class BandejaOficios implements OnInit {
     if (this.tipo() === 'salida') {
       this.filtro.update((f) => ({ ...f, estado: 'todos' }));
     }
-
     this.cargar();
   }
 
@@ -111,6 +112,35 @@ export class BandejaOficios implements OnInit {
     this.oficios.atender(oficio.atencion_id).subscribe(({ message }) => {
       this.avisos.exito(message);
       this.cargar();
+    });
+  }
+
+  
+  eliminar(id: number) {
+    this.abrirModalEliminar();
+  }
+
+   protected abrirModalEliminar(): void {
+    this.modalEliminarAbierto.set(true);
+  }
+
+  protected cerrarModalEliminar(): void {
+    this.modalEliminarAbierto.set(false);
+  }
+
+  eliminarR(id: number){
+    this.oficios.eliminarRegistro(id).subscribe({
+      next: (oficio) => {
+        if(oficio == true){
+           this.cerrarModalEliminar();
+          this.avisos.exito('Eliminado correctamente.');
+           this.cargar();
+          return;     
+        }else{
+          this.avisos.advertencia('El registro no se pudo eliminar.');
+          return;  
+        }
+      }
     });
   }
 }

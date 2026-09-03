@@ -100,4 +100,8 @@ export class OficiosService {
   firmadDoc(id: number, psw: string): Observable<number>{
     return this.http.get<number>(`${this.base}/firmarDoc/${id}/${psw}`);
   }
+
+  eliminarRegistro(id: number): Observable<boolean>{
+    return this.http.get<boolean>(`${this.base}/eliminarRegistro/${id}`);
+  }
 }
